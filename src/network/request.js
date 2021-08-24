@@ -8,6 +8,8 @@ export function request(config){
       timeout: 5000,
     })
 
+
+
     //请求拦截
     instance.interceptors.request.use(
         config=>{
@@ -17,7 +19,7 @@ export function request(config){
             //     config.headers.Authorization = 'Bearer '+token;
             // }
             //直接放行
-            return config;
+          return config;
     },
         err=>{})
 
@@ -25,7 +27,7 @@ export function request(config){
     instance.interceptors.response.use(
         res=>{
             //直接放行
-            return res.data ? res.data : res;
+          return res.data ? res.data : res;
         },
         err=>{
             //如果有接口需要授权,统一授权

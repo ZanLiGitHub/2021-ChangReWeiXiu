@@ -2,35 +2,35 @@ import {request} from './request';
 
 //项目管理
 //获取项目列表
-export function getXMList(params){
+export function getProjectList(params){
     return request({
-        url:'/XMList',
+        url:'/ProjectList',
         method:'get',
         params: params,
     })
 }
 //添加项目列表
-export function addXMList(data){
+export function addProjectList(data){
 
   return request({
-    url:`/XMList`,
+    url:'/ProjectList/',
     method:'post',
     data:data
   })
 }
 //删除项目列表
-export function deleteXMList(id){
+export function deleteProjectList(id){
 
   return request({
-    url:`/XMList/${id}`,
+    url:`/ProjectList/${id}`,
     method:'delete',
   })
 }
 //修改项目列表
-export function editXMList(id,data){
+export function editProjectList(id,data){
 
   return request({
-    url:`/XMList/${id}`,
+    url:`/ProjectList/${id}`,
     method:'put',
     data:data
   })

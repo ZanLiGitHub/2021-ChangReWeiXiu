@@ -35,12 +35,14 @@
             :data="data"
             :columns="columns"
             :row-key="row => row.id"
+            :loading="loading"
             flat
             square
             class="my-sticky-header-table tabletop"
             style="height:auto;"
           >
-           <!-- 操作按钮注释start -->
+
+            <!-- 操作按钮注释start -->
             <template #body-cell-opt="props">
               <td style="text-align: center;">
                 <q-btn icon="create" flat round dense color="blue" :to="{path:'/xgxm_xg', query:{id:props.key}}">
@@ -52,7 +54,10 @@
               </td>
             </template>
             <!-- 操作按钮注释 end-->
+
+
           </q-table>
+
         </div>
       </q-tab-panel>
       <q-tab-panel name="sptg">
@@ -69,7 +74,7 @@
   </div>
 </template>
 <script>
-import {getXMList, deleteXMList} from "../../network/data";
+import {getProjectList, deleteProjectList} from "../../network/data";
 
 export default {
   name: "",
@@ -147,97 +152,42 @@ export default {
           columns: true
         }
       ],//表格列名
+      loading:true,
       data: [],//列表数据
       tab: "dsp",
 
       maximized: process.env.editMaximized, //编辑全屏
-
-      //原生参数
-      //leftDrawerOpen:true,
-      //abc: false,
-      //nodes_mechanism:[],
-      //icked_mechanism: [],
-      //val: true,
-      //tab1: "dzc",
-      //
-      //model: null,
-      //alert: false,
-      //lsit: null,
-      //age: null,
-      //date: "2020/01/15",
-      //accept: true,
-      //sel: null,
-      //
-      //num: null,
-      //group: ["gro1", "gro2"],
-      //option: [
-      //  {
-      //    label: "option1",
-      //    value: "gro1"
-      //  },
-      //  {
-      //    label: "option1",
-      //    value: "gro2"
-      //  }
-      //]
     };
   },
   methods: {
     //删除项目列表项
     deleteData(id){
       console.log(id);
-      //后端通信
-      deleteXMList(id)
-      getXMList().then(res => {this.data = res})
+      if(id !== 0){
+        //开启加载动画
+        this.loading = true
+        //后端通信
+        deleteProjectList(id)
+        getProjectList().then(res => {this.data = res})
+        console.log("重新通信");
+        //关闭加载动画
+        this.loading = false
+      }
     },
-
-    //原生方法
-    //onReset() {
-    //  this.lsit = null;
-    //  this.age = null;
-    //  this.accept = false;
-    //},
-    //onRejected(rejectedEntries) {
-    //  // Notify plugin needs to be installed
-    //  // https://quasar.dev/quasar-plugins/notify#Installation
-    //  this.$q.notify({
-    //    type: "negative",
-    //    message: `${rejectedEntries.length} file(s) did not pass validation constraints`
-    //  });
-    //}
-    //add() {
-    //  //  this.alert=!this.alert
-    //  this.alert = true;
-    //},
-    //onSubmit() {
-    //  if (this.accept !== true) {
-    //    this.$q.notify({
-    //      color: "red-5",
-    //      textColor: "white",
-    //      icon: "warning",
-    //      message: "You need to accept the license and terms first"
-    //    });
-    //  } else {
-    //    this.$q.notify({
-    //      color: "green-4",
-    //      textColor: "white",
-    //      icon: "cloud_done",
-    //      message: "Submitted"
-    //    });
-    //  }
-    //},
   },
-
   //监控筛选组件
   watch: {
+    //监测filter
     filter:{
       handler(val){
+        //开启加载动画
+        this.loading = true
         let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
         let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
 
         if(xmlx !== null || sglx !==null || val.selectKey !== ""){
           console.log("重新通信");
-          getXMList({xmlx,sglx}).then(res => {
+          getProjectList({xmlx,sglx}).then(res => {
             if(val.selectKey === ""){
               this.data = res
             }
@@ -245,7 +195,7 @@ export default {
               let newList = [];
               for(let key in res){
                 let item = res[key]
-                if(item.id.includes(val.selectKey) || item.xmmc.includes(val.selectKey) || item.xmlx.includes(val.selectKey) || item.sglx.includes(val.selectKey) || item.jfmc.includes(val.selectKey) || item.yfmc.includes(val.selectKey) || item.xmje.includes(val.selectKey)) {
+                if(item.xmmc.includes(val.selectKey) || item.xmlx.includes(val.selectKey) || item.sglx.includes(val.selectKey) || item.jfmc.includes(val.selectKey) || item.yfmc.includes(val.selectKey) || item.xmje.includes(val.selectKey)) {
                   newList.push(item)
                 }
               }
@@ -253,23 +203,27 @@ export default {
             }
           })
         }
-        else if(val.selectKey !== ""){
+        else if(val.selectKey === ""){
           console.log("回到默认")
-          getXMList({xmlx,sglx}).then(res => {
+          getProjectList({xmlx,sglx}).then(res => {
             if (val.selectKey === "") {
               this.data = res
             }
           })
         }
+        this.loading = false
       },
       deep:true
     },
   },
   //生命周期：挂载后
   mounted() {
+
+    this.loading = true
     //获取项目列表
-    getXMList().then(res => {
+    getProjectList().then(res => {
       this.data = res
+      this.loading = false
     })
   },
 };

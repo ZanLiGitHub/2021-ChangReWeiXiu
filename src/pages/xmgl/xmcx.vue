@@ -1,23 +1,25 @@
 <template>
   <div class="row q-pa-md">
+    <!--面包屑导航-->
     <q-breadcrumbs style="width:100%; margin:10px 0;">
       <q-breadcrumbs-el label="首页" icon="home" to="/main" />
       <q-breadcrumbs-el label="项目列表" icon="dvr" to="/xmcx" />
       <q-breadcrumbs-el label="项目查询" />
     </q-breadcrumbs>
+    <!--搜索栏-->
     <div class="q-py-sm" style="width:400px">
-      <q-input outlined dense bg-color="white" color="grey-9" placeholder="请输入您要搜索的关键字">
+      <q-input outlined dense bg-color="white" color="grey-9" v-model="filter.selectKey" placeholder="请输入您要搜索的关键字">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
       </q-input>
     </div>
-    <!--筛选条件start-->
+    <!--筛选条件-->
     <div class="q-px-md q-py-sm flex warp q-gutter-xs">
       <q-select
         outlined
         dense
-        v-model="sel1"
+        v-model="filter.xmlx"
         :options="options1"
         bg-color="white"
         style="width:150px"
@@ -25,43 +27,46 @@
       <q-select
         outlined
         dense
-        v-model="sel2"
+        v-model="filter.sglx"
         :options="options2"
         bg-color="white"
         style="width:150px"
       />
     </div>
-    <!--筛选条件end-->
     <q-space />
+    <!--新建项目按钮-->
     <div class="text-right q-gutter-sm q-pt-sm">
       <q-btn outline text-color="blue-8" label="新建项目" class="apply-btn" to="/xjxm" />
     </div>
+
     <q-separator />
-    <!--tab 切换 start -->
+
+    <!--项目列表-->
     <q-tab-panels v-model="tab" animated style="width:100%;">
       <q-tab-panel name="dsp" style="padding:10px 0 0 0;">
         <div>
           <q-table
-            :data="datay"
+            :data="data"
             :columns="columnsy"
-            row-key="name"
+            :row-key="row => row.id"
+            :loading="loading"
             flat
             square
             class="my-sticky-header-table tabletop"
             style="height:auto;"
           >
-            <!-- 操作按钮注释start -->
+            <!-- 操作按钮注释start -->
             <template #body-cell-opt="props">
-              <td style="text-align: center;">
-                <q-btn icon="preview" flat round dense color="blue" @click="layout = true">
+              <td style="text-align: center;">
+                <q-btn icon="preview" flat round dense color="blue" @click="popupDetail = true;findData(props.key)">
                   <q-tooltip>查看</q-tooltip>
                 </q-btn>
-                <q-btn icon="tune" flat round dense color="blue" @click="jc = true">
+                <q-btn icon="tune" flat round dense color="blue" @click="popupProgress = true;findData(props.key)">
                   <q-tooltip>查看进程</q-tooltip>
                 </q-btn>
               </td>
             </template>
-            <!-- 操作按钮注释 end-->
+            <!-- 操作按钮注释 end-->
           </q-table>
         </div>
       </q-tab-panel>
@@ -75,10 +80,182 @@
         <div class="text-h6">Movies</div>Lorem ipsum dolor sit amet consectetur adipisicing elit.
       </q-tab-panel>
     </q-tab-panels>
-    <!--tab 切换 end -->
-    <!--弹出进程start-->
-    <div class="q-pa-md q-gutter-sm" style="width:100%">
-      <q-dialog v-model="jc">
+    <!--弹出查看-->
+    <div v-if="data.length > 0" class="q-pa-md q-gutter-sm" style="width:100%">
+      <q-dialog v-model="popupDetail" >
+        <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
+          <q-header class="bg-primary">
+            <q-toolbar>
+              <q-toolbar-title>查看项目</q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container>
+            <div class="q-pa-lg">
+              <div class="q-my-sm">
+                <q-form>
+                  <div class="col-sm-5 col-xs-12">
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目名称：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].xmmc}}</div>
+                      </div>
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目编号：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].xmbh}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目类型：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].xmlx}}</div>
+                      </div>
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">施工类型：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].sglx}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">甲方名称：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].jfmc}}</div>
+                      </div>
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">乙方名称：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].yfmc}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目开始时间：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].kssj}}</div>
+                      </div>
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目结束时间：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].jssj}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目负责人：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].xmfzr}}</div>
+                      </div>
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">项目金额(元)：</div>
+                      </div>
+                      <div class="col col-md-4">
+                        <div class="text-body1">{{data[key].xmje}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-2 text-right">
+                        <div class="q-mr-sm" style="font-size:14px; color:#757575">选择关联：</div>
+                      </div>
+                      <div class="col col-md-10">
+                        <div class="text-body1">{{data[key].xzgl}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center" style="margin-bottom:10px">
+                      <div class="col col-md-12">
+                        <div class="text-body1">{{data[key].xmjj}}</div>
+                      </div>
+                    </div>
+                    <div class="row items-center">
+                      <div class="col col-md-1２">
+                        <div class="q-pa-md" style="padding:20px 0 0 0">
+                          <div class="q-gutter-md" style="max-width: 50%;">
+
+                          </div>
+                        </div>
+                        <!-- 附件列表start -->
+                        <q-tab-panels v-model="tab" animated style="width:100%;">
+                          <q-tab-panel name="dsp" style="padding:0px">
+                            <div>
+                              <q-table
+                                :data="data[key].fjlb"
+                                :columns="fjColumn"
+                                row-key="name"
+                                flat
+                                square
+                                class="my-sticky-header-table tabletop"
+                                style="height:auto;"
+                              >
+                              </q-table>
+                            </div>
+                          </q-tab-panel>
+
+                        </q-tab-panels>
+                        <!--合同列表-->
+                        <q-tab-panels v-model="tab" animated style="width:100%;">
+                          <q-tab-panel name="dsp" style="padding:0px">
+                            <div>
+                              <q-table
+                                :data="data[key].htlb"
+                                :columns="htColumn"
+                                row-key="name"
+                                flat
+                                square
+                                class="my-sticky-header-table tabletop"
+                                style="height:auto;"
+                              >
+                              </q-table>
+                            </div>
+                          </q-tab-panel>
+
+                        </q-tab-panels>
+                        <!--发票列表-->
+                        <q-tab-panels v-model="tab" animated style="width:100%;">
+                          <q-tab-panel name="dsp" style="padding:0px">
+                            <div>
+                              <q-table
+                                :data="data[key].fplb"
+                                :columns="fpColumn"
+                                row-key="name"
+                                flat
+                                square
+                                class="my-sticky-header-table tabletop"
+                                style="height:auto;"
+                              >
+                              </q-table>
+                            </div>
+                          </q-tab-panel>
+
+                        </q-tab-panels>
+                        <!-- 附件列表 end-->
+                      </div>
+                    </div>
+                  </div>
+                  <div  class="col-sm-5 col-xs-12" style="text-align:center;">
+                    <q-btn label="关闭" v-close-popup color="primary" />
+                  </div>
+                </q-form>
+              </div>
+            </div>
+          </q-page-container>
+        </q-layout>
+      </q-dialog>
+    </div>
+    <!--弹出进程-->
+    <div v-if="data.length > 0" class="q-pa-md q-gutter-sm" style="width:100%">
+      <q-dialog v-model="popupProgress">
         <q-layout
           view="Lhh lpR fff"
           container
@@ -94,9 +271,9 @@
           <q-page-container>
             <div class="q-pa-lg">
               <div class="q-my-sm">
-                <q-form @submit="onSubmit" @reset="onReset">
+                <q-form>
                   <div class="col-sm-5 col-xs-12">
-                    
+
                     <div class="row items-center" style="margin-bottom:10px">
                       <div class="col col-md-4 text-left">
                         <div class="q-mr-sm" style="font-size:17px; color:#757575">收款合计：</div>
@@ -110,13 +287,13 @@
                     </div>
                     <div class="row items-center" style="margin-bottom:10px">
                       <div class="col col-md-4 text-left">
-                        <div class="text-h4" style="color:red">78,535,000</div>
+                        <div class="text-h4" style="color:red">{{data[key].skhj}}</div>
                       </div>
                       <div class="col col-md-4 text-left">
-                        <div class="text-h4"  style="color:green">5,540,000</div>
+                        <div class="text-h4"  style="color:green">{{data[key].fkhj}}</div>
                       </div>
                       <div class="col col-md-4 text-left">
-                        <div class="text-h4" style="color:red">77,981,000</div>
+                        <div class="text-h4" style="color:red">{{data[key].lrhj}}</div>
                       </div>
                     </div>
                     <div class="row items-center">
@@ -124,22 +301,22 @@
                         <div class="q-pa-md" style="padding:20px 0 0 0">
                           <div class="q-gutter-md" style="max-width: 50%;"></div>
                         </div>
-                        <!-- 附件列表start -->
+                        <!--合同列表-->
                         <q-tab-panels v-model="tab" animated style="width:100%;">
                           <q-tab-panel name="dsp" style="padding:0px">
                             <div>
                               <q-table
-                                :data="data_jc"
-                                :columns="columns_jc"
-                                row-key="name"
+                                :data="data[key].htlb"
+                                :columns="jcColumn"
+                                :row-key="row => row.htbh"
                                 flat
                                 square
                                 class="my-sticky-header-table tabletop"
                                 style="height:auto;"
                               >
-                                <!-- 操作按钮注释start -->
+                                <!-- 操作按钮注释start -->
                                 <template #body-cell-opt="props">
-                                  <td style="text-align: center;">
+                                  <td style="text-align: center;">
                                     <q-btn
                                       icon="preview"
                                       flat
@@ -150,15 +327,15 @@
                                     >
                                       <q-tooltip>查看</q-tooltip>
                                     </q-btn>
-                          
+
                                   </td>
                                 </template>
-                                <!-- 操作按钮注释 end-->
+                                <!-- 操作按钮注释 end-->
                               </q-table>
                             </div>
                           </q-tab-panel>
                         </q-tab-panels>
-                        <!-- 附件列表 end-->
+                        <!-- 附件列表 end-->
                       </div>
                     </div>
                   </div>
@@ -172,211 +349,29 @@
         </q-layout>
       </q-dialog>
     </div>
-    <!-- 弹出进程end -->
-    <!--弹出查看start-->
-  <div class="q-pa-md q-gutter-sm" style="width:100%">
-    <q-dialog v-model="layout" >
-      <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
-        <q-header class="bg-primary">
-          <q-toolbar>
-            <q-toolbar-title>查看项目</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container>
-            <div class="q-pa-lg">
 
-    <div class="q-my-sm">
-      <q-form @submit="onSubmit" @reset="onReset">
- <div class="col-sm-5 col-xs-12">
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目名称：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">城市供热工程管道基础建设工程</div>
-              </div>
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目编号：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">ABCD001</div>
-              </div>
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目类型：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">建设</div>
-              </div>
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">施工类型：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">维护</div>
-              </div>
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">甲方名称：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">长春市热力(集团)有限责任公司</div>
-              </div>
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">乙方名称：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">长春市某某某某公司</div>
-              </div>
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目开始时间：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">2021-06-22</div>
-              </div>
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目结束时间：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">2021-12-22</div>
-              </div>
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目负责人：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">张大</div>
-              </div>
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">项目金额(元)：</div>
-              </div>
-              <div class="col col-md-4">
-                <div class="text-body1">128,000.00元</div>
-              </div>
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-2 text-right">
-                <div class="q-mr-sm" style="font-size:14px; color:#757575">选择关联：</div>
-              </div>
-              <div class="col col-md-10">
-                <div class="text-body1">否</div>
-              </div>              
-            </div>
-            <div class="row items-center" style="margin-bottom:10px">
-              <div class="col col-md-12">
-              <div class="text-body1">　　在该项目的生产制造中，制造团队认真梳理了项目的关键节点及技术难点，克服了后期所有操作技术难点，为产品制造的顺利进行奠定了基础；分析出产计划，倒排工期，统筹安排人力和设备资源，确保计划完成率；全体核电从业人员严格按照核质保体系及程序文件要求，管控好每一个环节、每一道工序质量，所有焊缝UT探伤一次合格；为确保项目进度，全体人员放弃节假日时间，先后攻克多项制造技术难关，最终保质保量完成设备制造发运。</div>
-              </div>
-            </div>
-            <div class="row items-center">         
-              <div class="col col-md-1２">
-                <div class="q-pa-md" style="padding:20px 0 0 0">
-                  <div class="q-gutter-md" style="max-width: 50%;">              
-
-                  </div>
-                </div>
- <!-- 附件列表start -->
- <q-tab-panels v-model="tab" animated style="width:100%;">
-      <q-tab-panel name="dsp" style="padding:0px">
-        <div>
-          <q-table
-            :data="data1"
-            :columns="columns1"
-            row-key="name"
-            flat
-            square
-            class="my-sticky-header-table tabletop"
-            style="height:auto;"            
-          >
-          </q-table>
-        </div>
-      </q-tab-panel>
-
-    </q-tab-panels>
-    <!-- 附件列表 end-->
-    <!-- 附件列表start -->
- <q-tab-panels v-model="tab" animated style="width:100%;">
-      <q-tab-panel name="dsp" style="padding:0px">
-        <div>
-          <q-table
-            :data="data2"
-            :columns="columns2"
-            row-key="name"
-            flat
-            square
-            class="my-sticky-header-table tabletop"
-            style="height:auto;"            
-          >
-          </q-table>
-        </div>
-      </q-tab-panel>
-
-    </q-tab-panels>
-    <!-- 附件列表 end-->
-    <!-- 附件列表start -->
- <q-tab-panels v-model="tab" animated style="width:100%;">
-      <q-tab-panel name="dsp" style="padding:0px">
-        <div>
-          <q-table
-            :data="data3"
-            :columns="columns3"
-            row-key="name"
-            flat
-            square
-            class="my-sticky-header-table tabletop"
-            style="height:auto;"            
-          >
-          </q-table>
-        </div>
-      </q-tab-panel>
-
-    </q-tab-panels>
-    <!-- 附件列表 end-->
-              </div>
-            </div>
- </div>
- <div  class="col-sm-5 col-xs-12" style="text-align:center;">
-          <q-btn label="关闭" v-close-popup color="primary" />
-        </div>
-      </q-form>
-    </div>
-  </div>
-        </q-page-container>      
-      </q-layout>
-    </q-dialog>
-  </div>
-    <!-- 弹出查看end -->   
   </div>
 </template>
 <script>
+
+import {getProjectList} from "../../network/data";
 
 export default {
   name: "",
   data() {
     return {
-      maximized: process.env.editMaximized, //编辑全屏
-      htxx: false,
-      leftDrawerOpen: true,
-      sel1: "项目类型",
-      sel2: "施工类型",
-      abc: false,
-      nodes_mechanism: [],
-      icked_mechanism: [],
-      val: true,
-      tab: "dsp",
-      tab1: "dzc",
-      layout: false,
-      jc: false,
-      moreContent: true,
-      drawer: false,
-      drawerR: false,
+      //筛选项
+      options1: ["全部","维修项目", "新建项目"], //筛选条件
+      options2: ["全部","机械", "人工", "材料"], //筛选条件
+      filter:{
+        //搜索与筛选参数
+        selectKey:"", //搜索栏关键字
+        xmlx: "项目类型", //筛选结果
+        sglx: "施工类型", //筛选结果
 
-      lorem:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Natus, ratione eum minus fuga, quasi dicta facilis corporis magnam, suscipit at quo nostrum!",
+      },
+
+      //项目列表
       columnsy: [
         {
           name: "xmbh",
@@ -437,7 +432,14 @@ export default {
           columns: true
         }
       ],
-      columns1: [
+      loading:true,
+      data:[],
+      tab: "dsp",
+      key: 0,
+
+      //查看项目
+      popupDetail: false,
+      fjColumn: [
         {
           name: "fjbh",
           required: true,
@@ -475,40 +477,40 @@ export default {
           field: "fjscrq"
         }
       ],
-      columns2: [
+      htColumn: [
         {
-          name: "fjbh",
+          name: "htbh",
           required: true,
           label: "合同编号",
           align: "left",
-          field: "fjbh",
+          field: "htbh",
           background: "bg-teal"
         },
         {
-          name: "fjmc",
+          name: "yf",
           required: true,
           label: "乙方单位",
           align: "left",
-          field: "fjmc"
+          field: "yf"
         }
         ,
         {
-          name: "fjlx",
+          name: "je",
           required: true,
           label: "合同金额(元)",
           align: "left",
-          field: "fjlx"
+          field: "je"
         }
         ,
         {
-          name: "fjdx",
+          name: "rq",
           required: true,
           label: "合同日期",
           align: "left",
-          field: "fjdx"
+          field: "rq"
         }
       ],
-      columns3: [
+      fpColumn: [
         {
           name: "fjbh",
           required: true,
@@ -541,87 +543,10 @@ export default {
           field: "fjdx"
         }
       ],
-      datay: [
-        {
-          xmbh: "ABCD001",
-          xmmc: "城市供热工程管道基础建设工程",
-          xmlx: "建设",
-          sglx: "维护",
-          jfmc: "长春市热力(集团)有限责任公司",
-          yfmc: "长春市某某某某公司",
-          xmje: "128,000.00",
-          cz: "[11],[22]"
-        },
-        {
-          xmbh: "ABCD002",
-          xmmc: "城市供热工程管道基础建设工程",
-          xmlx: "建设",
-          sglx: "维护",
-          jfmc: "长春市热力(集团)有限责任公司",
-          yfmc: "长春市某某某某公司",
-          xmje: "128,000.00"
-        },
-        {
-          xmbh: "ABCD003",
-          xmmc: "城市供热工程管道基础建设工程",
-          xmlx: "建设",
-          sglx: "维护",
-          jfmc: "长春市热力(集团)有限责任公司",
-          yfmc: "长春市某某某某公司",
-          xmje: "128,000.00"
-        }
-      ],
-      data1: [
-        {
-          fjbh: "01",
-          fjmc: "城市供热工程管道基础建设工程合同",
-          fjlx: "文档",
-          fjdx: "1.2M",
-          fjscrq: "2021-06-22 15:30"
-        },
-        {
-          fjbh: "02",
-          fjmc: "城市供热工程管道基础建设工程合同正本",
-          fjlx: "图片",
-          fjdx: "3.2M",
-          fjscrq: "2021-06-22 15:25"
-        }
-      ],
-      data2: [
-      
-        {
-          fjbh: "01",
-          fjmc: "城市供热工程材料合同",
-          fjlx: "200,000.00",
-          fjdx: "2021-06-22 15:30",
-          fjscrq: "2021-06-22 15:30"
-        },
-        {
-          fjbh: "02",
-          fjmc: "城市供热工程劳务合同",
-          fjlx: "200,000.00",
-          fjdx: "2021-06-22 15:30",
-          fjscrq: "2021-06-22 15:30"
-        }
-      ],
-      data3: [
-      
-        {
-          fjbh: "01",
-          fjmc: "城市供热工程材料合同",
-          fjlx: "200,000.00",
-          fjdx: "2021-06-22 15:30",
-          fjscrq: "2021-06-22 15:30"
-        },
-        {
-          fjbh: "02",
-          fjmc: "城市供热工程劳务合同",
-          fjlx: "200,000.00",
-          fjdx: "2021-06-22 15:30",
-          fjscrq: "2021-06-22 15:30"
-        }
-      ],
-      columns_jc: [
+
+      //查看进程
+      popupProgress: false,
+      jcColumn: [
         {
           name: "htbh",
           required: true,
@@ -664,100 +589,75 @@ export default {
           columns: true
         }
       ],
-      data_jc: [
-        {
-          htbh: "20210607",
-          xmbh: "015464851",
-          jf: "长春闻言科技有限公司",
-          yf: "吉林省长热维修实业有限公司",
-          rq: "2021-06-22",
-          je: "78,535,000"
-        },
-        {
-          htbh: "20210607",
-          xmbh: "015464851",
-          jf: "长春闻言科技有限公司",
-          yf: "吉林省长热维修实业有限公司",
-          rq: "2021-06-22",
-          je: "78,535,000"
-        },
-        {
-          htbh: "20210607",
-          xmbh: "015464851",
-          jf: "长春闻言科技有限公司",
-          yf: "吉林省长热维修实业有限公司",
-          rq: "2021-06-22",
-          je: "78,535,000"
-        },
-        {
-          htbh: "20210607",
-          xmbh: "015464851",
-          jf: "长春闻言科技有限公司",
-          yf: "吉林省长热维修实业有限公司",
-          rq: "2021-06-22",
-          je: "78,535,000"
-        }
-      ],
-      model: null,
-      alert: false,
-      lsit: null,
-      age: null,
-      date: "2020/01/15",
-      accept: false,
-      sel: null,
-      val: true,
-      options1: ["维修项目", "新建项目"],
-      options2: ["机械", "人工", "材料"],
-      num: null,
-      group: ["gro1", "gro2"],
-      option: [
-        {
-          label: "option1",
-          value: "gro1"
-        },
-        {
-          label: "option1",
-          value: "gro2"
-        }
-      ],
+
+      //查看合同
+      htxx: false,
     };
   },
-  methods: {
-    add() {
-      //  this.alert=!this.alert
-      this.alert = true;
-    },
-    onSubmit() {
-      if (this.accept !== true) {
-        this.$q.notify({
-          color: "red-5",
-          textColor: "white",
-          icon: "warning",
-          message: "You need to accept the license and terms first"
-        });
-      } else {
-        this.$q.notify({
-          color: "green-4",
-          textColor: "white",
-          icon: "cloud_done",
-          message: "Submitted"
-        });
-      }
-    },
+  computed:{
 
-    onReset() {
-      this.lsit = null;
-      this.age = null;
-      this.accept = false;
-    },
-    onRejected(rejectedEntries) {
-      // Notify plugin needs to be installed
-      // https://quasar.dev/quasar-plugins/notify#Installation
-      this.$q.notify({
-        type: "negative",
-        message: `${rejectedEntries.length} file(s) did not pass validation constraints`
-      });
+  },
+  methods: {
+    //通过row-key寻找被点击行的数据
+    findData(id){
+      for(let key in this.data){
+        if(this.data[key].id === id){
+          this.key = key
+        }
+      }
     }
-  }
+  },
+  //监控筛选组件
+  watch: {
+    filter:{
+      handler(val){
+        //开启加载动画
+        this.loading = true
+
+        let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
+        let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
+
+        if(xmlx !== null || sglx !==null || val.selectKey !== ""){
+          console.log("重新通信");
+          getProjectList({xmlx,sglx}).then(res => {
+            if(val.selectKey === ""){
+              this.data = res
+            }
+            else{
+              let newList = [];
+              for(let key in res){
+                let item = res[key]
+                if(item.xmmc.includes(val.selectKey) || item.xmlx.includes(val.selectKey) || item.sglx.includes(val.selectKey) || item.jfmc.includes(val.selectKey) || item.yfmc.includes(val.selectKey) || item.xmje.includes(val.selectKey)) {
+                  newList.push(item)
+                }
+              }
+              this.data = newList
+            }
+          })
+        }
+        else if(val.selectKey === ""){
+          console.log("回到默认")
+          getProjectList({xmlx,sglx}).then(res => {
+            if (val.selectKey === "") {
+              this.data = res
+            }
+          })
+        }
+        this.loading = false
+      },
+      deep:true
+    },
+  },
+  //生命周期：挂载后
+  mounted() {
+    //开启加载动画
+    this.loading = true
+    //获取项目列表
+    getProjectList().then(res => {
+      this.data = res
+      //结束加载动画
+      this.loading = false
+    })
+  },
 };
 </script>

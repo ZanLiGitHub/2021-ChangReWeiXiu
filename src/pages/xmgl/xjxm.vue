@@ -188,7 +188,7 @@
                 <div class="q-mr-sm" style="font-size:14px; color:#757575">选择关联</div>
               </div>
               <div class="col col-md-11">
-                <q-radio v-model="inputs.xzgl" val="yes" label="是" /><q-radio v-model="inputs.xzgl" val="no" label="否" />
+                <q-radio v-model="inputs.xzgl" val="是" label="是" /><q-radio v-model="inputs.xzgl" val="否" label="否" />
               </div>
 
             </div>
@@ -280,7 +280,7 @@
 
 <script>
 import {ref, reactive} from 'vue'
-import {addXMList} from "../../network/data";
+import {addProjectList} from "../../network/data";
 
 export default {
   data() {
@@ -296,12 +296,24 @@ export default {
         yfmc:"",
         kssj:"2021/01/01",
         jssj:"2021/01/01",
+        jgrq:"",
+        zbj:"",
+        zbq:"",
+        htzc:"",
+        yszk:"",
+        kpje:"",
+        skje:"",
         xmfzr:"",
         xmje:"",
-        xzgl:"yes",
+        xzgl:"是",
         xmjj:"",
+        skhj: "暂无",
+        fkhj: "暂无",
+        lrhj: "暂无",
         fj:null,
         fjlb:[],
+        htlb: [],
+        fplb: []
       },
 
       //是否同意规定
@@ -364,16 +376,6 @@ export default {
       date: new Date(),
 
       formHasError: false
-
-      //原生参数
-      //age: null,
-      //num: null,
-      //leftDrawerOpen:true,
-      //abc: false,
-      //nodes_mechanism:[],
-      //icked_mechanism: [],
-      //val: true,
-      //tab1: "dzc",
     };
 
   },
@@ -400,8 +402,6 @@ export default {
       let month = date.getMonth() + 1<10? "0"+(date.getMonth()+ 1):date.getMonth() + 1;
       let strDate = date.getDate()<10? "0" + date.getDate():date.getDate();
       fileDate = date.getFullYear() + "-"  + month  + "-"  + strDate + " "  + date.getHours()  + ":"  + date.getMinutes()
-
-      console.log(this.inputs.fj);
 
       //在文件列表前添加新文件
       this.inputs.fjlb.unshift({
@@ -448,16 +448,16 @@ export default {
       //假设表单没有错误
       this.formHasError = false
       //查看表单是否有错
-      for(let key in this.$refs){
-        let item = this.$refs[key]
-        if(item.validate){
-          item.validate()
-          if(item.hasError){
-            console.log("error in " + key);
-            this.formHasError = true
-          }
-        }
-      }
+      //for(let key in this.$refs){
+      //  let item = this.$refs[key]
+      //  if(item.validate){
+      //    item.validate()
+      //    if(item.hasError){
+      //      console.log("error in " + key);
+      //      this.formHasError = true
+      //    }
+      //  }
+      //}
       //检查输入通过
       if(!this.formHasError){
         //判断是否同意规定，如果未同意
@@ -468,16 +468,16 @@ export default {
             icon: "warning",
             message: "You need to accept the license and terms first"
           });
-          //判断是否同意规定，如果意
+          //判断是否同意规定，如果同意
         }
         else {
-          console.log(this.formHasError);
+          console.log(this.inputs);
           //清空未上传的附件
           this.inputs.fj = null;
           //生成合同id
-          this.inputs.id = this.inputs.xmbh
-          //后端通信
-          addXMList(this.inputs)
+
+          this.inputs.id = this.date.getTime().toString()
+          addProjectList(this.inputs)
           //弹出通知
           this.$q.notify({
             color: "green-4",
@@ -493,23 +493,39 @@ export default {
     //重置
     onReset() {
       this.inputs = {
-        xmmc:"",
         id:"",
-        xmbh: "",
+        xmmc:"",
+        xmbh:"",
         xmlx:"项目类型",
         sglx:"施工类型",
         jfmc:"",
         yfmc:"",
         kssj:"2021/01/01",
         jssj:"2021/01/01",
+        jgrq:"",
+        zbj:"",
+        zbq:"",
+        htzc:"",
+        yszk:"",
+        kpje:"",
+        skje:"",
         xmfzr:"",
         xmje:"",
-        xzgl:"yes",
+        xzgl:"是",
         xmjj:"",
+        skhj: "暂无",
+        fkhj: "暂无",
+        lrhj: "暂无",
         fj:null,
         fjlb:[],
+        htlb: [],
+        fplb: []
       }
     }
+  },
+
+  mounted() {
+    console.log(typeof this.date.getTime());
   }
 };
 </script>

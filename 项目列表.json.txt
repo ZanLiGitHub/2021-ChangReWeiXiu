@@ -1,0 +1,45 @@
+{
+  "XMList": [
+    {
+      "id": "",
+      "xmmc": "",
+      "xmbh": "",
+      "xmlx": "",
+      "sglx": "",
+      "jfmc": "",
+      "yfmc": "",
+      "kssq": "",
+      "jssq": "",
+      ""
+      "xmfzr": "",
+      "xmje": "",
+      "xzgl": "",
+      "xmjj": "",
+      "skhj": "",
+      "fkhj": "",
+      "lrhj": "",
+      "fj": null,
+      "fjlb": [
+        {
+          "fjbh": "",
+          "fjmc": "",
+          "fjlx": "",
+          "fjdx": "",
+          "fjscrq": ""
+        }
+      ],
+      "htlb": [
+        {
+          "htbh": "",
+          "xmbh": "",
+          "jf": "",
+          "yf": "",
+          "je": "",
+          "rq": ""
+
+        }
+      ],
+      "fplb": []
+    }
+  ]
+}

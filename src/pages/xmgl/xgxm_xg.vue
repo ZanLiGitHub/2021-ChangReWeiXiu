@@ -187,7 +187,7 @@
               <div class="q-mr-sm" style="font-size:14px; color:#757575">选择关联</div>
             </div>
             <div class="col col-md-11">
-              <q-radio v-model="inputs.xzgl" val="yes" label="是" /><q-radio v-model="inputs.xzgl" val="no" label="否" />
+              <q-radio v-model="inputs.xzgl" val="是" label="是" /><q-radio v-model="inputs.xzgl" val="否" label="否" />
             </div>
 
           </div>
@@ -270,7 +270,7 @@
         <!--提交按钮-->
         <div  class="col-sm-5 col-xs-12" style="text-align:center;">
           <q-btn label="确定" type="submit" color="primary" />
-          <q-btn label="清除" type="reset" color="primary" flat class="q-ml-sm" />
+          <q-btn label="重置 " type="reset" color="primary" flat class="q-ml-sm" />
         </div>
       </q-form>
     </div>
@@ -278,29 +278,15 @@
 </template>
 
 <script>
-import {editXMList, getXMList} from "../../network/data";
+import {editProjectList, getProjectList} from "../../network/data";
 
 export default {
   data() {
     return {
       //输入数据
-      inputs: {
-        xmmc:"",
-        xmbh:"",
-        id:"",
-        xmlx:"项目类型",
-        sglx:"施工类型",
-        jfmc:"",
-        yfmc:"",
-        kssj:"2021/01/01",
-        jssj:"2021/01/01",
-        xmfzr:"",
-        xmje:"",
-        xzgl:"yes",
-        xmjj:"",
-        fj:null,
-        fjlb:[],
-      },
+      inputs:{},
+      //用于还原数据
+      preinputs:{},
 
       //是否同意规定
       accept: true,
@@ -362,16 +348,6 @@ export default {
       date: new Date(),
 
       formHasError: false
-
-      //原生参数
-      //age: null,
-      //num: null,
-      //leftDrawerOpen:true,
-      //abc: false,
-      //nodes_mechanism:[],
-      //icked_mechanism: [],
-      //val: true,
-      //tab1: "dzc",
     };
 
   },
@@ -446,16 +422,16 @@ export default {
       //假设表单没有错误
       this.formHasError = false
       //查看表单是否有错
-      for(let key in this.$refs){
-        let item = this.$refs[key]
-        if(item.validate){
-          item.validate()
-          if(item.hasError){
-            console.log("error in " + key);
-            this.formHasError = true
-          }
-        }
-      }
+      //for(let key in this.$refs){
+      //  let item = this.$refs[key]
+      //  if(item.validate){
+      //    item.validate()
+      //    if(item.hasError){
+      //      console.log("error in " + key);
+      //      this.formHasError = true
+      //    }
+      //  }
+      //}
       //检查输入通过
       if(!this.formHasError){
         //判断是否同意规定，如果未同意
@@ -472,7 +448,7 @@ export default {
           //清空未上传的附件
           this.inputs.fj = null;
           //后端通信
-          editXMList(this.inputs.id ,this.inputs)
+          editProjectList(this.inputs.id ,this.inputs)
           //弹出通知
           this.$q.notify({
             color: "green-4",
@@ -487,28 +463,18 @@ export default {
     },
     //重置
     onReset() {
-      this.inputs = {
-        xmmc:"",
-        id:"",
-        xmlx:"项目类型",
-        sglx:"施工类型",
-        jfmc:"",
-        yfmc:"",
-        kssj:"2021/01/01",
-        jssj:"2021/01/01",
-        xmfzr:"",
-        xmje:"",
-        xzgl:"yes",
-        xmjj:"",
-        fj:null,
-        fjlb:[],
-      }
+      //深拷贝恢复原数据
+      this.inputs = JSON.parse(JSON.stringify(this.preinputs))
     }
   },
 
   mounted() {
-    getXMList({id:this.$route.query.id}).then(res=>{
-      this.inputs = res[0] //获取原数据
+    //后端通信获取项目列表
+    getProjectList({id:this.$route.query.id}).then(res=>{
+      //获取原数据
+      this.inputs = res[0]
+      //深拷贝备份原数据
+      this.preinputs = JSON.parse(JSON.stringify(this.inputs))
     })
   }
 };
