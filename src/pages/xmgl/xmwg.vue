@@ -14,7 +14,6 @@
               <div class="q-mr-sm" style="font-size:14px; color:#757575">项目名称</div>
             </div>
             <div class="col col-md-5">
-              <!--placeholder="请输入项目名称"-->
               <q-input
                 v-model="inputs.xmmc"
                 style="margin-bottom:-20px;" outlined dense bg-color="white" color="grey-9"
@@ -23,9 +22,10 @@
                :rules="[val => val && val.length > 0 && val.replace(/\s/g, '').length!==0|| '请输入项目名称']"
                :shadow-text="inputShadowText"
                @keydown="processInputFill"
-               @focus="processInputFill">
-                <template v-slot:append>
-                  <q-icon name="search" @click="popupProject= true"/>
+               @focus="processInputFill"
+                :loading="loadingState">
+                <template v-slot:append >
+                  <q-icon name="search" @click="popupProject= true; selected=[]"/>
                 </template>
               </q-input>
             </div>
@@ -202,98 +202,96 @@
         </div>
       </q-form>
     </div>
-<!--合同信息弹出start-->
-  <div class="q-pa-md q-gutter-sm" style="width:100%">
-    <q-dialog v-model="popupProject" >
-      <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
-        <q-header class="bg-primary">
-          <q-toolbar>
-            <q-toolbar-title>项目列表</q-toolbar-title>
-            <q-btn flat v-close-popup round dense icon="close" />
-          </q-toolbar>
-        </q-header>
-        <q-page-container>
+    <!--项目列表弹出start-->
+    <div class="q-pa-md q-gutter-sm" style="width:100%">
+      <q-dialog v-model="popupProject" >
+        <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
+          <q-header class="bg-primary">
+            <q-toolbar>
+              <q-toolbar-title>项目列表</q-toolbar-title>
+              <q-btn flat v-close-popup round dense icon="close" />
+            </q-toolbar>
+          </q-header>
+          <q-page-container>
             <div class="q-pa-lg">
-              <!--筛选条件start-->
-<div class="q-py-sm" style="width:400px">
-            <q-input outlined dense bg-color="white" color="grey-9" placeholder="请输入您要搜索的关键字">
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-    <!--筛选条件end-->
+              <!--筛选条件-->
+              <div class="q-py-sm" style="width:400px">
+                <!--搜索框-->
+                <q-input outlined dense bg-color="white" color="grey-9" v-model="searchKey" placeholder="请输入您要搜索的关键字">
+                  <!--搜索图标-->
+                  <template v-slot:prepend>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+              <!--表单内容-->
+              <div class="q-my-sm">
+                <q-form>
+                  <div class="col-sm-5 col-xs-12">
+                    <div class="row items-center">
+                      <div class="col col-md-12">
+                        <div class="q-pa-md" style="padding:20px 0 0 0">
+                          <div class="q-gutter-md" style="max-width: 50%;"></div>
+                        </div>
+                        <!-- 项目表单-->
+                        <q-tab-panels v-model="tab" animated style="width:100%;">
+                          <q-tab-panel name="dsp" style="padding:0px;margin:0px;">
+                            <div>
+                              <q-table
+                                :data="projectList"
+                                :columns="columns_xm"
+                                :row-key="row => row.id"
+                                flat
+                                square
+                                class="my-sticky-header-table tabletop"
+                                style="height: 500px;"
+                                selection="single"
+                                :selected.sync="selected"
+                                :loading="loading"
+                              >
+                                <!--<template #body-cell-hxje="props">-->
+                                <!--  <td>-->
+                                <!--    <q-input-->
+                                <!--      v-model="lsit"-->
+                                <!--      outlined-->
+                                <!--      placeholder="金额"-->
+                                <!--      style="margin-bottom:-20px;"-->
+                                <!--      dense-->
+                                <!--      :rules="[ val => val && val.length > 0 || '金额']"-->
+                                <!--    />-->
+                                <!--  </td>-->
+                                <!--</template>-->
 
-    <div class="q-my-sm">
-      <q-form @submit="onSubmit" @reset="onReset">
-        <div class="col-sm-5 col-xs-12">
-          <div class="row items-center">
-              <div class="col col-md-12">
-                <div class="q-pa-md" style="padding:20px 0 0 0">
-                  <div class="q-gutter-md" style="max-width: 50%;">
+                              </q-table>
+                            </div>
+                          </q-tab-panel>
 
+                        </q-tab-panels>
+                      </div>
+                    </div>
                   </div>
-                </div>
- <!-- 合同表单start -->
- <q-tab-panels v-model="tab" animated style="width:100%;">
-      <q-tab-panel name="dsp" style="padding:0px;margin:0px;">
-        <div>
-          <q-table
-            :data="projectList"
-            :columns="columns_xm"
-            row-key="id"
-            flat
-            square
-            class="my-sticky-header-table tabletop"
-            style="height: 500px;"
-            selection="multiple"
-            selected.sync=false
-          >
-          <template #body-cell-hxje="props">
-            <td>
-              <q-input
-                  v-model="lsit"
-                  outlined
-                  placeholder="金额"
-                  style="margin-bottom:-20px;"
-                  dense
-                  :rules="[ val => val && val.length > 0 || '金额']"
-                />
-            </td>
-          </template>
-
-          </q-table>
-        </div>
-      </q-tab-panel>
-
-    </q-tab-panels>
-    <!-- 合同表单 end-->
+                  <div  class="col-sm-5 col-xs-12" style="text-align:center;">
+                    <q-btn label="完成" v-close-popup color="primary" @click="finishSelect" />
+                  </div>
+                </q-form>
               </div>
             </div>
- </div>
- <div  class="col-sm-5 col-xs-12" style="text-align:center;">
-          <q-btn label="关闭" v-close-popup color="primary" />
-        </div>
-      </q-form>
-    </div>
-  </div>
         </q-page-container>
       </q-layout>
     </q-dialog>
   </div>
-    <!-- 合同信息弹出end -->
 
   </div>
 </template>
 
 <script>
-import {addProjectList, getProjectList} from "../../network/data";
+import {addProjectList, editProjectList, getProjectList} from "../../network/data";
 import { event } from 'quasar'
 const { stopAndPrevent } = event
 export default {
   data() {
     return {
-      //输入数据
+      //表单
       inputs:{
         xmmc:"",
         jgrq:"",
@@ -305,13 +303,13 @@ export default {
         skje:"",
         fj:null,
         fjlb:[]
-      },
-      //实时搜索到的项目名称
-      foundXmmc:"",
-      //输入是否有误
-      formHasError: false,
-
-
+      },//输入数据
+      foundXmmc:"",//实时搜索到的项目名称
+      formHasError: false,//输入是否有误
+      inputFillCancelled: false,//自动补全项目名称：取消自动补全
+      accept: true,
+      data:[],
+      loadingState:false, //项目名称输入框的加载状态
 
       //文件列表
       columns: [
@@ -359,11 +357,11 @@ export default {
           align: "center",
           columns: true
         }
-      ],
-      tab: "dsp",
+      ],//每列内容
+      tab: "dsp",//标签页名称
 
       //弹出项目列表
-      popupProject:false,
+      popupProject:false,//弹出状态
       columns_xm: [
         {
           name: "xmbh",
@@ -413,19 +411,16 @@ export default {
           field: "kssj",
           sortable: true
         },
-      ],
-      //项目列表
-      projectList:[],
-
+      ],//每列内容
+      projectList:[],//项目列表
+      searchKey:"",//搜索关键字
+      loading: false,//加载中动画
+      selected:[], //被选项
 
       //日期
       date: new Date(),
-
-      //自动补全项目名称：取消自动补全
-      inputFillCancelled: false,
     };
   },
-
 
   computed: {
     //自动补全项目名称：声称项目名称自动补全的文字
@@ -478,6 +473,10 @@ export default {
       for(let index=0, length=this.projectList.length; index<length; index++){
         if(this.projectList[index].xmmc.includes(this.inputs.xmmc)){
           this.foundXmmc = this.projectList[index].xmmc
+          this.loadingState = false
+        }
+        else{
+          this.loadingState = true
         }
       }
     },
@@ -544,6 +543,13 @@ export default {
       this.sortFileList()
     },
 
+    //完成选择项目
+    finishSelect(){
+      //自动填入被选项目的信息
+      this.inputs.xmmc = this.selected[0].xmmc;
+      this.inputs.fjlb = this.selected[0].fjlb;
+    },
+
     //上传
     onSubmit() {
       //检查输入
@@ -575,10 +581,12 @@ export default {
         else {
           //清空未上传的附件
           this.inputs.fj = null;
-          //生成合同id
-          this.inputs.id = toString(this.date.getTime())
+          //生成新数据
+          this.data = Object.assign(this.selected[0], this.inputs)
+          console.log(this.data);
+
           //后端通信
-          addProjectList(this.inputs)
+          editProjectList(this.data.id ,this.data)
           //弹出通知
           this.$q.notify({
             color: "green-4",
@@ -586,92 +594,89 @@ export default {
             icon: "cloud_done",
             message: "Submitted"
           });
-          //跳转
-          setTimeout(()=>{this.$router.push({path:'/xgxm'})},1000)
         }
       }
     },
     //重置
     onReset() {
-      this.inputs = {
-        id:"",
-        xmmc:"",
-        xmbh:"",
-        xmlx:"项目类型",
-        sglx:"施工类型",
-        jfmc:"",
-        yfmc:"",
-        kssj:"2021/01/01",
-        jssj:"2021/01/01",
-        jgrq:"",
-        zbj:"",
-        zbq:"",
-        htzc:"",
-        yszk:"",
-        kpje:"",
-        skje:"",
-        xmfzr:"",
-        xmje:"",
-        xzgl:"是",
-        xmjj:"",
-        skhj: "暂无",
-        fkhj: "暂无",
-        lrhj: "暂无",
-        fj:null,
-        fjlb:[],
-        htlb: [],
-        fplb: []
-      }
+      this.$q.dialog({
+        title: '确认清除',
+        message: '将清除所有输入',
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        this.inputs = {
+          xmmc:"",
+          jgrq:"",
+          zbj:"",
+          zbq:"",
+          htzc:"",
+          yszk:"",
+          kpje:"",
+          skje:"",
+          fj:null,
+          fjlb:[]
+        }
+      }).onOk(() => {
+        // console.log('>>>> second OK catcher')
+      }).onCancel(() => {
+        // console.log('>>>> Cancel')
+      }).onDismiss(() => {
+        // console.log('I am triggered on both OK and Cancel')
+      })
+
     }
   },
 
   watch: {
-    //监测filter
-    //filter:{
-    //  handler(val){
-    //    //开启加载动画
-    //    this.loading = true
-    //    let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
-    //    let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
-    //
-    //    if(xmlx !== null || sglx !==null || val.selectKey !== ""){
-    //      console.log("重新通信");
-    //      getProjectList({xmlx,sglx}).then(res => {
-    //        if(val.selectKey === ""){
-    //          this.data = res
-    //        }
-    //        else{
-    //          let newList = [];
-    //          for(let key in res){
-    //            let item = res[key]
-    //            if(item.xmmc.includes(val.selectKey) || item.xmlx.includes(val.selectKey) || item.sglx.includes(val.selectKey) || item.jfmc.includes(val.selectKey) || item.yfmc.includes(val.selectKey) || item.xmje.includes(val.selectKey)) {
-    //              newList.push(item)
-    //            }
-    //          }
-    //          this.data = newList
-    //        }
-    //      })
-    //    }
-    //    else if(val.selectKey === ""){
-    //      console.log("回到默认")
-    //      getProjectList({xmlx,sglx}).then(res => {
-    //        if (val.selectKey === "") {
-    //          this.data = res
-    //        }
-    //      })
-    //    }
-    //    this.loading = false
-    //  },
-    //  deep:true
-    //},
+    //监测弹出项目列表里的搜索框
+    searchKey:{
+      handler(val){
+        //开启加载动画
+        this.loading = true
+
+        if(val !== ""){
+          console.log("重新通信");
+          getProjectList().then(res => {
+            {
+              let newList = [];
+              for(let key in res){
+                let item = res[key]
+                if(item.xmmc.includes(val) || item.xmlx.includes(val) || item.sglx.includes(val) || item.jfmc.includes(val) || item.yfmc.includes(val) || item.xmje.includes(val)) {
+                  newList.push(item)
+                }
+              }
+              this.projectList = newList
+            }
+          })
+        }
+        else if(val === ""){
+          console.log("回到默认")
+          getProjectList().then(res => {
+            this.projectList = res
+          })
+        }
+        this.loading = false
+      },
+    },
+
+    inputs:{
+      handler(val){
+        this.loadingState = true
+        this.searchProject()
+        console.log(val.xmmc);
+      },
+
+      deep:true,
+    }
+
+
   },
   //生命周期：挂载后
   mounted() {
-    this.loading = true
     //获取项目列表
     getProjectList().then(res => {
       this.projectList = res
-      this.loading = false
     })
   },
 };

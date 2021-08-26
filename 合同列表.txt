@@ -1,0 +1,28 @@
+"ContractList": [
+    {
+      "id": "",
+      "htbh": "",
+      "xzgl":"",
+      "xmmc": "",
+      "htje": "",
+      "jfmc": "",
+      "jffzr": "",
+      "yfmc": "",
+      "yffzr": "",
+      "kssj": "",
+      "jssj":"",
+      "qdrq": "",
+      "fkfs": "",
+      "htbz": "",
+      "fj": "",
+      "fjlb": [],
+      "xmje":"",
+      "xmlx":"",
+      "sglx":"",
+      "xmkssj":"",
+      "xmjssj":"",,
+      "fkbl":"",
+      "sd":false
+    }
+  ]
+

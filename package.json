@@ -15,11 +15,14 @@
     "@vue/composition-api": "^0.6.4",
     "axios": "^0.18.1",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "kindeditor": "^4.1.10",
+    "quasar": "^1.0.0",
+    "vue-quill-editor": "^3.0.6"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",
-    "@types/node": "^10.17.15"
+    "@types/node": "^10.17.15",
+    "vue-kindeditor": "^0.4.7"
   },
   "browserslist": [
     "ie >= 11",

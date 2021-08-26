@@ -8,7 +8,7 @@
     </q-breadcrumbs>
     <!--搜索栏-->
     <div class="q-py-sm" style="width:400px">
-      <q-input outlined dense bg-color="white" color="grey-9" v-model="filter.selectKey" placeholder="请输入您要搜索的关键字">
+      <q-input outlined dense bg-color="white" color="grey-9" v-model="filter.searchKey" placeholder="请输入您要搜索的关键字">
         <template v-slot:append>
           <q-icon name="search" />
         </template>
@@ -175,7 +175,10 @@
                     </div>
                     <div class="row items-center" style="margin-bottom:10px">
                       <div class="col col-md-12">
-                        <div class="text-body1">{{data[key].xmjj}}</div>
+                        <!--<div class="text-body1" :v-html="data[key].xmjj"></div>-->
+                        <q-card flat bordered>
+                          <q-card-section v-html="data[key].xmjj" />
+                        </q-card>
                       </div>
                     </div>
                     <div class="row items-center">
@@ -365,7 +368,7 @@ export default {
       options2: ["全部","机械", "人工", "材料"], //筛选条件
       filter:{
         //搜索与筛选参数
-        selectKey:"", //搜索栏关键字
+        searchKey:"", //搜索栏关键字
         xmlx: "项目类型", //筛选结果
         sglx: "施工类型", //筛选结果
 
@@ -617,17 +620,17 @@ export default {
         let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
         let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
 
-        if(xmlx !== null || sglx !==null || val.selectKey !== ""){
+        if(xmlx !== null || sglx !==null || val.searchKey !== ""){
           console.log("重新通信");
           getProjectList({xmlx,sglx}).then(res => {
-            if(val.selectKey === ""){
+            if(val.searchKey === ""){
               this.data = res
             }
             else{
               let newList = [];
               for(let key in res){
                 let item = res[key]
-                if(item.xmmc.includes(val.selectKey) || item.xmlx.includes(val.selectKey) || item.sglx.includes(val.selectKey) || item.jfmc.includes(val.selectKey) || item.yfmc.includes(val.selectKey) || item.xmje.includes(val.selectKey)) {
+                if(item.xmmc.includes(val.searchKey) || item.xmlx.includes(val.searchKey) || item.sglx.includes(val.searchKey) || item.jfmc.includes(val.searchKey) || item.yfmc.includes(val.searchKey) || item.xmje.includes(val.searchKey)) {
                   newList.push(item)
                 }
               }
@@ -635,10 +638,10 @@ export default {
             }
           })
         }
-        else if(val.selectKey === ""){
+        else if(val.searchKey === ""){
           console.log("回到默认")
           getProjectList({xmlx,sglx}).then(res => {
-            if (val.selectKey === "") {
+            if (val.searchKey === "") {
               this.data = res
             }
           })

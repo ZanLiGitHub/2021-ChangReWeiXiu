@@ -197,15 +197,7 @@
               <span class="q-mr-sm" style="font-size:14px; color:#757575">项目简介</span>
             </div>
             <div class="col col-md-11">
-              <q-input
-                ref="xmjjRef"
-                type="textarea"
-                v-model="inputs.xmjj"
-                outlined
-                placeholder="请输入项目简介"
-                dense
-                :rules="[ val => val && val.length > 0 || '请输入项目简介']"
-              />
+              <KindEditor :content="inputs.xmjj" @kindeditorChange="kindeditorChange"></KindEditor>
             </div>
           </div>
           <!--第八行：附件列表-->
@@ -279,6 +271,7 @@
 
 <script>
 import {editProjectList, getProjectList} from "../../network/data";
+import KindEditor from "../../components/KindEditor";
 
 export default {
   data() {
@@ -350,6 +343,10 @@ export default {
       formHasError: false
     };
 
+  },
+
+  components:{
+    KindEditor
   },
 
   methods: {
