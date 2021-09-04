@@ -41,7 +41,6 @@ export function request(config){
             //     message: err.response.data.errors[Object.keys(err.response.data.errors)[0]][0],
             //     position: 'bottom',
             // });
-
         }
     )
 

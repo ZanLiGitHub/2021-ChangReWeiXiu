@@ -201,8 +201,6 @@
             <div class="col col-md-11">
 
                 <KindEditor :content="inputs.xmjj" @kindeditorChange="kindeditorChange"></KindEditor>
-
-                <!--<Editor v-bind:model="inputs.xmjj"></Editor>-->
               </div>
             </div>
             <!--第八行：附件列表-->
@@ -280,21 +278,16 @@
 </template>
 
 <script>
-import {ref, reactive} from 'vue'
 import {addProjectList} from "../../network/data";
-
-import Editor from "../../components/Editor"
 import KindEditor from "../../components/KindEditor";
-
 
 export default {
   components: {
-    Editor,
     KindEditor
   },
+
   data() {
     return {
-
       //输入数据
       inputs: {
         id: "",
@@ -384,17 +377,17 @@ export default {
 
       //日期
       date: new Date(),
-
-      formHasError: false
     };
 
   },
 
   methods: {
+    //富文本编辑器
     kindeditorChange(e){
       this.inputs.xmjj = e
     },
-    //添加到文件列表
+
+    //上传附件：添加到附件列表
     addToAttachmentList() {
       //获取文件类型
       let fileType = ''
@@ -429,7 +422,7 @@ export default {
       //重新排列文件列表
       this.sortFileList()
     },
-    //重新排列文件列表
+    //上传附件：重新排列附件列表
     sortFileList() {
       //重新给文件列表编号
       let length = this.inputs.fjlb.length
@@ -439,7 +432,7 @@ export default {
 
       }
     },
-    //删除文件列表项
+    //上传附件：删除附件列表项
     deleteData(array, key, findKey) {
       //本地删除
       let length = array.length;
@@ -453,54 +446,39 @@ export default {
       //重新排列文件列表
       this.sortFileList()
     },
+
     //上传
     onSubmit() {
-      //检查输入
-      //假设表单没有错误
-      this.formHasError = false
-      //查看表单是否有错
-      //for(let key in this.$refs){
-      //  let item = this.$refs[key]
-      //  if(item.validate){
-      //    item.validate()
-      //    if(item.hasError){
-      //      console.log("error in " + key);
-      //      this.formHasError = true
-      //    }
-      //  }
-      //}
-      //检查输入通过
-      if (!this.formHasError) {
-        //判断是否同意规定，如果未同意
-        if (this.accept !== true) {
-          this.$q.notify({
-            color: "red-5",
-            textColor: "white",
-            icon: "warning",
-            message: "You need to accept the license and terms first"
-          });
-          //判断是否同意规定，如果同意
-        } else {
-          //清空未上传的附件
-          this.inputs.fj = null;
-          //生成合同id
-
-          this.inputs.id = this.date.getTime().toString()
-          addProjectList(this.inputs)
-          //弹出通知
-          this.$q.notify({
-            color: "green-4",
-            textColor: "white",
-            icon: "cloud_done",
-            message: "Submitted"
-          });
-          //跳转
-          setTimeout(() => {
-            this.$router.push({path: '/xgxm'})
-          }, 1000)
-        }
+      //判断是否同意规定，如果未同意
+      if (this.accept !== true) {
+        this.$q.notify({
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: "You need to accept the license and terms first"
+        });
+        //判断是否同意规定，如果同意
+      } else {
+        //清空未上传的附件
+        this.inputs.fj = null;
+        //生成合同id
+        this.inputs.id = this.date.getTime().toString()
+        //后端通信
+        addProjectList(this.inputs)
+        //弹出通知
+        this.$q.notify({
+          color: "green-4",
+          textColor: "white",
+          icon: "cloud_done",
+          message: "Submitted"
+        });
+        //跳转
+        setTimeout(() => {
+          this.$router.push({path: '/xgxm'})
+        }, 1000)
       }
     },
+
     //重置
     onReset() {
       this.$q.dialog({
@@ -538,23 +516,8 @@ export default {
           htlb: [],
           fplb: []
         }
-      }).onOk(() => {
-        // console.log('>>>> second OK catcher')
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
       })
     }
   },
-
-  computed: {
-    editor() {
-      return this.$refs.myQuillEditor.quill;
-    },
-  },
-
-  mounted() {
-  }
 };
 </script>

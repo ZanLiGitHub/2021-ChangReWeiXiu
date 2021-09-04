@@ -1,10 +1,19 @@
 import {request} from './request';
 
+//通用的获取列表方法
+export function getList(list, params){
+  return request({
+    url:`/${list}`,
+    method:'get',
+    params: params,
+  })
+}
+
 //项目管理
 //获取项目列表
 export function getProjectList(params){
     return request({
-        url:'/ProjectList',
+        url:'/projectList',
         method:'get',
         params: params,
     })
@@ -13,7 +22,7 @@ export function getProjectList(params){
 export function addProjectList(data){
 
   return request({
-    url:'/ProjectList/',
+    url:'/projectList/',
     method:'post',
     data:data
   })
@@ -22,7 +31,7 @@ export function addProjectList(data){
 export function deleteProjectList(id){
 
   return request({
-    url:`/ProjectList/${id}`,
+    url:`/projectList/${id}`,
     method:'delete',
   })
 }
@@ -30,7 +39,7 @@ export function deleteProjectList(id){
 export function editProjectList(id,data){
 
   return request({
-    url:`/ProjectList/${id}`,
+    url:`/projectList/${id}`,
     method:'put',
     data:data
   })
@@ -40,7 +49,7 @@ export function editProjectList(id,data){
 //获取合同列表
 export function getContractList(params){
   return request({
-    url:'/ContractList',
+    url:'/contractList',
     method:'get',
     params: params,
   })
@@ -49,7 +58,7 @@ export function getContractList(params){
 export function addContractList(data){
 
   return request({
-    url:'/ContractList',
+    url:'/contractList',
     method:'post',
     data:data
   })
@@ -58,7 +67,7 @@ export function addContractList(data){
 export function deleteContractList(id){
 
   return request({
-    url:`/ContractList/${id}`,
+    url:`/contractList/${id}`,
     method:'delete',
   })
 }
@@ -66,7 +75,7 @@ export function deleteContractList(id){
 export function editContractList(id,data){
 
   return request({
-    url:`/ContractList/${id}`,
+    url:`/contractList/${id}`,
     method:'put',
     data:data
   })
@@ -76,7 +85,7 @@ export function editContractList(id,data){
 //获取甲方列表
 export function getJFList(params){
   return request({
-    url:'/JFList',
+    url:'/jfList',
     method:'get',
     params: params,
   })
@@ -85,7 +94,7 @@ export function getJFList(params){
 export function addJFList(data){
 
   return request({
-    url:'/JFList',
+    url:'/jfList',
     method:'post',
     data:data
   })
@@ -94,7 +103,7 @@ export function addJFList(data){
 export function deleteJFList(id){
 
   return request({
-    url:`/JFList/${id}`,
+    url:`/jfList/${id}`,
     method:'delete',
   })
 }
@@ -102,7 +111,7 @@ export function deleteJFList(id){
 export function editJFList(id,data){
 
   return request({
-    url:`/JFList/${id}`,
+    url:`/jfList/${id}`,
     method:'put',
     data:data
   })
@@ -112,7 +121,7 @@ export function editJFList(id,data){
 //获取乙方列表
 export function getYFList(params){
   return request({
-    url:'/YFList',
+    url:'/yfList',
     method:'get',
     params: params,
   })
@@ -121,7 +130,7 @@ export function getYFList(params){
 export function addYFList(data){
 
   return request({
-    url:'/YFList',
+    url:'/yfList',
     method:'post',
     data:data
   })
@@ -130,7 +139,7 @@ export function addYFList(data){
 export function deleteYFList(id){
 
   return request({
-    url:`/YFList/${id}`,
+    url:`/yfList/${id}`,
     method:'delete',
   })
 }
@@ -138,7 +147,7 @@ export function deleteYFList(id){
 export function editYFList(id,data){
 
   return request({
-    url:`/YFList/${id}`,
+    url:`/yfList/${id}`,
     method:'put',
     data:data
   })

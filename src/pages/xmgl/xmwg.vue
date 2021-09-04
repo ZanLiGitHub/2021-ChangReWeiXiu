@@ -17,13 +17,8 @@
               <q-input
                 v-model="inputs.xmmc"
                 style="margin-bottom:-20px;" outlined dense bg-color="white" color="grey-9"
-                @keyup="searchProject"
                 placeholder="请输入项目名称"
-               :rules="[val => val && val.length > 0 && val.replace(/\s/g, '').length!==0|| '请输入项目名称']"
-               :shadow-text="inputShadowText"
-               @keydown="processInputFill"
-               @focus="processInputFill"
-                :loading="loadingState">
+               :rules="[val => val && val.length > 0 && val.replace(/\s/g, '').length!==0|| '请输入项目名称']">
                 <template v-slot:append >
                   <q-icon name="search" @click="popupProject= true; selected=[]"/>
                 </template>
@@ -249,19 +244,6 @@
                                 :selected.sync="selected"
                                 :loading="loading"
                               >
-                                <!--<template #body-cell-hxje="props">-->
-                                <!--  <td>-->
-                                <!--    <q-input-->
-                                <!--      v-model="lsit"-->
-                                <!--      outlined-->
-                                <!--      placeholder="金额"-->
-                                <!--      style="margin-bottom:-20px;"-->
-                                <!--      dense-->
-                                <!--      :rules="[ val => val && val.length > 0 || '金额']"-->
-                                <!--    />-->
-                                <!--  </td>-->
-                                <!--</template>-->
-
                               </q-table>
                             </div>
                           </q-tab-panel>
@@ -304,12 +286,8 @@ export default {
         fj:null,
         fjlb:[]
       },//输入数据
-      foundXmmc:"",//实时搜索到的项目名称
-      formHasError: false,//输入是否有误
-      inputFillCancelled: false,//自动补全项目名称：取消自动补全
       accept: true,
       data:[],
-      loadingState:false, //项目名称输入框的加载状态
 
       //文件列表
       columns: [
@@ -422,66 +400,8 @@ export default {
     };
   },
 
-  computed: {
-    //自动补全项目名称：声称项目名称自动补全的文字
-    inputShadowText () {
-      if (this.inputFillCancelled === true || this.inputs.xmmc === "") {
-        return ''
-      }
-
-      let t = this.foundXmmc
-      const empty = typeof this. inputs.xmmc !== 'string' || this. inputs.xmmc.length === 0
-
-      if (empty === true) {
-        return t
-      }
-      //else if (t.indexOf(this. inputs.xmmc) !== 0) {
-      //  return ''
-      //}
-
-      return t
-        .split(this. inputs.xmmc)
-        .slice(1)
-        .join(this. inputs.xmmc)
-    },
-  },
-
   methods: {
-    //自动补全项目名称：按下TAB键自动补全项目名称
-    processInputFill (e) {
-      if (e === void 0) {
-        return
-      }
-
-      if (e.keyCode === 27) {
-        if (this.inputFillCancelled !== true) {
-          this.inputFillCancelled = true
-        }
-      }
-      else if (e.keyCode === 9) {
-        if (this.inputFillCancelled !== true && this.inputShadowText.length > 0) {
-          stopAndPrevent(e)
-          this. inputs.xmmc = (typeof this. inputs.xmmc === 'string' ? this. inputs.xmmc : '') + this.inputShadowText
-        }
-      }
-      else if (this.inputFillCancelled === true) {
-        this.inputFillCancelled = false
-      }
-    },
-    //自动补全项目名称：在项目名称输入时在项目列表中寻找项目
-    searchProject(){
-      for(let index=0, length=this.projectList.length; index<length; index++){
-        if(this.projectList[index].xmmc.includes(this.inputs.xmmc)){
-          this.foundXmmc = this.projectList[index].xmmc
-          this.loadingState = false
-        }
-        else{
-          this.loadingState = true
-        }
-      }
-    },
-
-    //附件上传：添加到文件列表
+    //附件：添加到文件列表
     addToAttachmentList(){
       //获取文件类型
       let fileType = ''
@@ -518,7 +438,7 @@ export default {
       //重新排列文件列表
       this.sortFileList()
     },
-    //附件上传：重新排列文件列表
+    //附件：重新排列文件列表
     sortFileList(){
       //重新给文件列表编号
       let length = this.inputs.fjlb.length
@@ -528,7 +448,7 @@ export default {
 
       }
     },
-    //附件上传：删除文件列表项
+    //附件：删除文件列表项
     deleteData(array,key,findKey){
       //本地删除
       let length = array.length;
@@ -552,49 +472,32 @@ export default {
 
     //上传
     onSubmit() {
-      //检查输入
-      //假设表单没有错误
-      this.formHasError = false
-      //查看表单是否有错
-      //for(let key in this.$refs){
-      //  let item = this.$refs[key]
-      //  if(item.validate){
-      //    item.validate()
-      //    if(item.hasError){
-      //      console.log("error in " + key);
-      //      this.formHasError = true
-      //    }
-      //  }
-      //}
-      //检查输入通过
-      if(!this.formHasError){
-        //判断是否同意规定，如果未同意
-        if (this.accept !== true) {
-          this.$q.notify({
-            color: "red-5",
-            textColor: "white",
-            icon: "warning",
-            message: "You need to accept the license and terms first"
-          });
-          //判断是否同意规定，如果同意
-        }
-        else {
-          //清空未上传的附件
-          this.inputs.fj = null;
-          //生成新数据
-          this.data = Object.assign(this.selected[0], this.inputs)
-          console.log(this.data);
+      //判断是否同意规定，如果未同意
+      if (this.accept !== true) {
+        this.$q.notify({
+          color: "red-5",
+          textColor: "white",
+          icon: "warning",
+          message: "You need to accept the license and terms first"
+        });
+        //判断是否同意规定，如果同意
+      }
+      else {
+        //清空未上传的附件
+        this.inputs.fj = null;
+        //生成新数据
+        this.data = Object.assign(this.selected[0], this.inputs)
+        console.log(this.data);
 
-          //后端通信
-          editProjectList(this.data.id ,this.data)
-          //弹出通知
-          this.$q.notify({
-            color: "green-4",
-            textColor: "white",
-            icon: "cloud_done",
-            message: "Submitted"
-          });
-        }
+        //后端通信
+        editProjectList(this.data.id ,this.data)
+        //弹出通知
+        this.$q.notify({
+          color: "green-4",
+          textColor: "white",
+          icon: "cloud_done",
+          message: "Submitted"
+        });
       }
     },
     //重置
@@ -617,14 +520,7 @@ export default {
           fj:null,
           fjlb:[]
         }
-      }).onOk(() => {
-        // console.log('>>>> second OK catcher')
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
       })
-
     }
   },
 
@@ -659,18 +555,6 @@ export default {
         this.loading = false
       },
     },
-
-    inputs:{
-      handler(val){
-        this.loadingState = true
-        this.searchProject()
-        console.log(val.xmmc);
-      },
-
-      deep:true,
-    }
-
-
   },
   //生命周期：挂载后
   mounted() {

@@ -355,12 +355,12 @@
 
   </div>
 </template>
+
 <script>
 
 import {getProjectList} from "../../network/data";
 
 export default {
-  name: "",
   data() {
     return {
       //筛选项
@@ -441,7 +441,7 @@ export default {
       key: 0,
 
       //查看项目
-      popupDetail: false,
+      popupDetail: false,//弹出状态
       fjColumn: [
         {
           name: "fjbh",
@@ -479,7 +479,7 @@ export default {
           align: "left",
           field: "fjscrq"
         }
-      ],
+      ],//附件列表内容
       htColumn: [
         {
           name: "htbh",
@@ -512,7 +512,7 @@ export default {
           align: "left",
           field: "rq"
         }
-      ],
+      ],//合同列表内容
       fpColumn: [
         {
           name: "fjbh",
@@ -545,10 +545,10 @@ export default {
           align: "left",
           field: "fjdx"
         }
-      ],
+      ],//发票列表内容
 
       //查看进程
-      popupProgress: false,
+      popupProgress: false,//弹出状态
       jcColumn: [
         {
           name: "htbh",
@@ -591,17 +591,15 @@ export default {
           align: "center",
           columns: true
         }
-      ],
+      ],//进程列表内容
 
       //查看合同
-      htxx: false,
+      htxx: false,//弹出状态
     };
   },
-  computed:{
 
-  },
   methods: {
-    //通过row-key寻找被点击行的数据
+    //通过匹配row-key找到被点击信息在列表中的序号key, 在弹出窗口中显示data中特定key的信息
     findData(id){
       for(let key in this.data){
         if(this.data[key].id === id){
@@ -616,20 +614,23 @@ export default {
       handler(val){
         //开启加载动画
         this.loading = true
-
+        //判断项目类型和施工类型，如果是默认选项或者选择了全部，则传参时不传这个选项
         let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
         let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
-
+        //若选项参数后关键字参数并非默认则使用带参数的get
         if(xmlx !== null || sglx !==null || val.searchKey !== ""){
           console.log("重新通信");
           getProjectList({xmlx,sglx}).then(res => {
+            //如果搜索关键字为空，则直接使用获取的列表
             if(val.searchKey === ""){
               this.data = res
             }
+            //如果搜索关键字不为空，则使用过滤后的列表
             else{
               let newList = [];
               for(let key in res){
                 let item = res[key]
+                //搜索项目名称，项目类型，施工类型，甲方名称，乙方名称，项目金额
                 if(item.xmmc.includes(val.searchKey) || item.xmlx.includes(val.searchKey) || item.sglx.includes(val.searchKey) || item.jfmc.includes(val.searchKey) || item.yfmc.includes(val.searchKey) || item.xmje.includes(val.searchKey)) {
                   newList.push(item)
                 }
@@ -638,6 +639,7 @@ export default {
             }
           })
         }
+        //如果搜索关键字从有值变回无值，则只带项目类型和施工类型两个参数再获取一次
         else if(val.searchKey === ""){
           console.log("回到默认")
           getProjectList({xmlx,sglx}).then(res => {
@@ -646,6 +648,7 @@ export default {
             }
           })
         }
+        //结束加载状态动画
         this.loading = false
       },
       deep:true
@@ -653,12 +656,12 @@ export default {
   },
   //生命周期：挂载后
   mounted() {
-    //开启加载动画
+    //开启加载状态动画
     this.loading = true
     //获取项目列表
     getProjectList().then(res => {
       this.data = res
-      //结束加载动画
+      //结束加载状态动画
       this.loading = false
     })
   },

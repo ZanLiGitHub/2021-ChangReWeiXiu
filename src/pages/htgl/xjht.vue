@@ -2,7 +2,7 @@
   <div class="q-pa-lg">
     <!--页面标题-->
     <div class="text-h6 q-pb-md">
-      <strong>新建合同</strong>
+      <strong>新建合同(建设中)</strong>
     </div>
     <!--页面内容-->
     <div class="q-my-sm">
@@ -42,14 +42,11 @@
               <q-input
                 v-model="inputs.xmmc"
                 outlined
-                @keyup="searchProject"
+                @keyup="search('projectList', 'xmmc', isNewProject)"
                 placeholder="请输入项目名称"
                 style="margin-bottom:-20px;"
                 dense
-                :rules="[val => val && val.length > 0 && val.replace(/\s/g, '').length!==0|| '请输入项目名称']"
-                :shadow-text="inputShadowText"
-                @keydown="processInputFill"
-                @focus="processInputFill">
+                :rules="[val => val && val.length > 0 && val.replace(/\s/g, '').length!==0|| '请输入项目名称']">
                 <template v-slot:append >
                   <q-icon name="search" @click="popupProjectWindow"/>
                 </template>
@@ -75,7 +72,16 @@
               <div class="q-mr-sm" style="font-size:14px; color:#757575">甲方名称</div>
             </div>
             <div class="col col-md-5">
-              <q-input :rules="[ val => val && val.length > 0 || '请输入甲方名称']" style="margin-bottom: -20px" v-model="inputs.jfmc" outlined dense bg-color="white" color="grey-9" placeholder="请输入甲方名称">
+              <q-input
+                @keyup="search('jfList', 'jfmc', isNewJF)"
+                :rules="[ val => val && val.length > 0 || '请输入甲方名称']"
+                style="margin-bottom: -20px"
+                v-model="inputs.jfmc"
+                outlined
+                dense
+                bg-color="white"
+                color="grey-9"
+                placeholder="请输入甲方名称">
                 <template v-slot:append>
                   <q-icon name="search" @click="popupJFWindow"/>
                 </template>
@@ -101,7 +107,16 @@
               <div class="q-mr-sm" style="font-size:14px; color:#757575">乙方名称</div>
             </div>
             <div class="col col-md-5">
-              <q-input style="margin-bottom: -20px" :rules="[ val => val && val.length > 0 || '请输入乙方名称']" v-model="inputs.yfmc" outlined dense bg-color="white" color="grey-9" placeholder="请输入乙方名称">
+              <q-input
+                @keyup="search('yfList', 'yfmc', isNewYF)"
+                style="margin-bottom: -20px"
+                :rules="[ val => val && val.length > 0 || '请输入乙方名称']"
+                v-model="inputs.yfmc"
+                outlined
+                dense
+                bg-color="white"
+                color="grey-9"
+                placeholder="请输入乙方名称">
                 <template v-slot:append>
                   <q-icon name="search" @click="popupYFWindow"/>
                 </template>
@@ -285,6 +300,71 @@
           <q-btn label="清除" type="reset" color="primary" flat class="q-ml-sm"/>
         </div>
 
+        <!--项目列表弹出-->
+        <div class="q-pa-md q-gutter-sm" style="width:100%">
+          <q-dialog v-model="popupProject" >
+            <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
+              <q-header class="bg-primary">
+                <q-toolbar>
+                  <q-toolbar-title>项目列表</q-toolbar-title>
+                  <q-btn flat v-close-popup round dense icon="close" />
+                </q-toolbar>
+              </q-header>
+              <q-page-container>
+                <div class="q-pa-lg">
+                  <!--筛选条件-->
+                  <div class="q-py-sm" style="width:400px">
+                    <!--搜索框-->
+                    <q-input outlined dense bg-color="white" color="grey-9" @keyup="search('projectList')" v-model="searchKey" placeholder="请输入您要搜索的关键字">
+                      <!--搜索图标-->
+                      <template v-slot:prepend>
+                        <q-icon name="search" />
+                      </template>
+                    </q-input>
+                  </div>
+                  <!--表单内容-->
+                  <div class="q-my-sm">
+                    <q-form>
+                      <div class="col-sm-5 col-xs-12">
+                        <div class="row items-center">
+                          <div class="col col-md-12">
+                            <div class="q-pa-md" style="padding:20px 0 0 0">
+                              <div class="q-gutter-md" style="max-width: 50%;"></div>
+                            </div>
+                            <!-- 项目表单-->
+                            <q-tab-panels v-model="tab" animated style="width:100%;">
+                              <q-tab-panel name="dsp" style="padding:0px;margin:0px;">
+                                <div>
+                                  <q-table
+                                    :data="projectList"
+                                    :columns="columns_xm"
+                                    :row-key="row => row.id"
+                                    flat
+                                    square
+                                    class="my-sticky-header-table tabletop"
+                                    style="height: 500px;"
+                                    selection="single"
+                                    :selected.sync="selected"
+                                    :loading="loading"
+                                  >
+                                  </q-table>
+                                </div>
+                              </q-tab-panel>
+
+                            </q-tab-panels>
+                          </div>
+                        </div>
+                      </div>
+                      <div  class="col-sm-5 col-xs-12" style="text-align:center;">
+                        <q-btn label="完成" v-close-popup color="primary" @click="finishPopup('popupProject',['xmmc', ''], isNewProject)" />
+                      </div>
+                    </q-form>
+                  </div>
+                </div>
+              </q-page-container>
+            </q-layout>
+          </q-dialog>
+        </div>
         <!--甲方弹出-->
         <div class="q-pa-md q-gutter-sm" style="width:100%">
           <q-dialog v-model="popupJF">
@@ -299,7 +379,9 @@
                 <div class="q-pa-lg">
                   <!--筛选条件-->
                   <div class="q-py-sm" style="width:400px">
-                    <q-input outlined dense bg-color="white" color="grey-9" placeholder="请输入您要搜索的关键字">
+                    <!--搜索框-->
+                    <q-input outlined dense bg-color="white" color="grey-9" @keyup="search('jfList')" v-model="searchKey" placeholder="请输入您要搜索的关键字">
+                      <!--搜索图标-->
                       <template v-slot:append>
                         <q-icon name="search"/>
                       </template>
@@ -307,7 +389,7 @@
                   </div>
                   <!--甲方列表-->
                   <div class="q-my-sm">
-                    <q-form @submit="onSubmit" @reset="onReset">
+                    <q-form>
                       <div class="col-sm-5 col-xs-12">
                         <div class="row items-center">
                           <div class="col col-md-12">
@@ -320,11 +402,14 @@
                                   <q-table
                                     :data="jfList"
                                     :columns="columns_JF"
-                                    row-key="name"
+                                    :row-key="row => row.id"
                                     flat
                                     square
                                     class="my-sticky-header-table tabletop"
                                     style="height:auto;"
+                                    selection="single"
+                                    :selected.sync="selected"
+                                    :loading="loading"
                                   >
                                   </q-table>
                                 </div>
@@ -335,7 +420,7 @@
                         </div>
                       </div>
                       <div class="col-sm-5 col-xs-12" style="text-align:center;">
-                        <q-btn label="关闭" v-close-popup color="primary"/>
+                        <q-btn label="完成" v-close-popup color="primary" @click="finishPopup('popupJF',['jfmc', 'jffzr'],isNewJF)"/>
                       </div>
                     </q-form>
                   </div>
@@ -358,14 +443,16 @@
                 <div class="q-pa-lg">
                   <!--筛选条件-->
                   <div class="q-py-sm" style="width:400px">
-                    <q-input outlined dense bg-color="white" color="grey-9" placeholder="请输入您要搜索的关键字">
+                    <!--搜索框-->
+                    <q-input outlined dense bg-color="white" color="grey-9" v-model="searchKey" @keyup="search('yfList')" placeholder="请输入您要搜索的关键字">
+                      <!--搜索图标-->
                       <template v-slot:append>
                         <q-icon name="search"/>
                       </template>
                     </q-input>
                   </div>
                   <div class="q-my-sm">
-                    <q-form @submit="onSubmit" @reset="onReset">
+                    <q-form>
                       <div class="col-sm-5 col-xs-12">
                         <div class="row items-center">
                           <div class="col col-md-12">
@@ -379,11 +466,14 @@
                                   <q-table
                                     :data="yfList"
                                     :columns="columns_YF"
-                                    row-key="name"
+                                    :row-key="row => row.id"
                                     flat
                                     square
                                     class="my-sticky-header-table tabletop"
                                     style="height:auto;"
+                                    selection="single"
+                                    :selected.sync="selected"
+                                    :loading="loading"
                                   >
                                   </q-table>
                                 </div>
@@ -393,7 +483,7 @@
                         </div>
                       </div>
                       <div class="col-sm-5 col-xs-12" style="text-align:center;">
-                        <q-btn label="关闭" v-close-popup color="primary"/>
+                        <q-btn label="完成" v-close-popup color="primary" @click="finishPopup('popupYF',['yfmc','yffzr'], isNewYF)"/>
                       </div>
                     </q-form>
                   </div>
@@ -405,89 +495,12 @@
       </q-form>
     </div>
 
-    <!--项目列表弹出start-->
-    <div class="q-pa-md q-gutter-sm" style="width:100%">
-      <q-dialog v-model="popupProject" >
-        <q-layout view="Lhh lpR fff" container class="bg-white" style="width:80%; max-width:80%;height:80%;">
-          <q-header class="bg-primary">
-            <q-toolbar>
-              <q-toolbar-title>项目列表</q-toolbar-title>
-              <q-btn flat v-close-popup round dense icon="close" />
-            </q-toolbar>
-          </q-header>
-          <q-page-container>
-            <div class="q-pa-lg">
-              <!--筛选条件-->
-              <div class="q-py-sm" style="width:400px">
-                <!--搜索框-->
-                <q-input outlined dense bg-color="white" color="grey-9" v-model="searchKey" placeholder="请输入您要搜索的关键字">
-                  <!--搜索图标-->
-                  <template v-slot:prepend>
-                    <q-icon name="search" />
-                  </template>
-                </q-input>
-              </div>
-              <!--表单内容-->
-              <div class="q-my-sm">
-                <q-form>
-                  <div class="col-sm-5 col-xs-12">
-                    <div class="row items-center">
-                      <div class="col col-md-12">
-                        <div class="q-pa-md" style="padding:20px 0 0 0">
-                          <div class="q-gutter-md" style="max-width: 50%;"></div>
-                        </div>
-                        <!-- 项目表单-->
-                        <q-tab-panels v-model="tab" animated style="width:100%;">
-                          <q-tab-panel name="dsp" style="padding:0px;margin:0px;">
-                            <div>
-                              <q-table
-                                :data="projectList"
-                                :columns="columns_xm"
-                                :row-key="row => row.id"
-                                flat
-                                square
-                                class="my-sticky-header-table tabletop"
-                                style="height: 500px;"
-                                selection="single"
-                                :selected.sync="selected"
-                                :loading="loading"
-                              >
-                                <!--<template #body-cell-hxje="props">-->
-                                <!--  <td>-->
-                                <!--    <q-input-->
-                                <!--      v-model="lsit"-->
-                                <!--      outlined-->
-                                <!--      placeholder="金额"-->
-                                <!--      style="margin-bottom:-20px;"-->
-                                <!--      dense-->
-                                <!--      :rules="[ val => val && val.length > 0 || '金额']"-->
-                                <!--    />-->
-                                <!--  </td>-->
-                                <!--</template>-->
 
-                              </q-table>
-                            </div>
-                          </q-tab-panel>
-
-                        </q-tab-panels>
-                      </div>
-                    </div>
-                  </div>
-                  <div  class="col-sm-5 col-xs-12" style="text-align:center;">
-                    <q-btn label="完成" v-close-popup color="primary" @click="finishSelect" />
-                  </div>
-                </q-form>
-              </div>
-            </div>
-          </q-page-container>
-        </q-layout>
-      </q-dialog>
-    </div>
   </div>
 </template>
 
 <script>
-import {addContractList, addProjectList, getProjectList, getJFList, getYFList, addJFList, addYFList} from "../../network/data";
+import {getList, addContractList, addProjectList, getProjectList, getJFList, getYFList, addJFList, addYFList} from "../../network/data";
 import { event } from 'quasar'
 import KindEditor from "../../components/KindEditor";
 const { stopAndPrevent } = event
@@ -519,9 +532,7 @@ export default {
         "fkbl": "",
         "sd": false
       },
-      foundXmmc:"",//实时搜索到的项目名称
       formHasError: false,//输入是否有误
-      inputFillCancelled: false,//自动补全项目名称：取消自动补全
       accept: true,//同意规定
       options1: ["现金", "转账", "汇票"],//付款方式选项
 
@@ -578,18 +589,18 @@ export default {
       popupJF:false,//弹出状态
       columns_JF: [
         {
-          name: "xh",
+          name: "id",
           required: true,
           label: "序号",
           align: "left",
-          field: "xh"
+          field: "id"
         },
         {
-          name: "gsmc",
+          name: "jfmc",
           required: true,
           label: "公司名称",
           align: "left",
-          field: "gsmc",
+          field: "jfmc",
           background: "bg-teal"
         },
         {
@@ -601,24 +612,24 @@ export default {
         }
       ],//每列内容
       jfList: [],//甲方列表
-      isNewJF:false,
+      isNewJF:false,//输入项是否在后端列表里
 
       //乙方列表
       popupYF:false,//弹出状态
       columns_YF: [
         {
-          name: "xh",
+          name: "id",
           required: true,
           label: "序号",
           align: "left",
-          field: "xh"
+          field: "id"
         },
         {
-          name: "gsmc",
+          name: "yfmc",
           required: true,
           label: "公司名称",
           align: "left",
-          field: "gsmc",
+          field: "yfmc",
           background: "bg-teal"
         },
         {
@@ -630,7 +641,7 @@ export default {
         }
       ],//每列内容
       yfList: [],//乙方列表
-      isNewYF:false,
+      isNewYF:false,//输入项是否在后端列表里
 
       //弹出项目列表
       popupProject:false,//弹出状态
@@ -688,10 +699,12 @@ export default {
       searchKey:"",//搜索关键字
       loading: false,//加载中动画
       selected:[], //被选项
-      isNewProject:false,
+      isNewProject:false,//输入项是否在列表里
 
       //日期
-      date: new Date()
+      date: new Date(),
+      //键盘抬起后的计时器，用于在打字时减少与后端通信
+      timer: null,
     };
 
   },
@@ -700,31 +713,98 @@ export default {
     KindEditor
   },
 
-  computed: {
-    //自动补全项目名称：声称项目名称自动补全的文字
-    inputShadowText () {
-      if (this.inputFillCancelled === true || this.inputs.xmmc === "") {
-        return ''
-      }
-
-      let t = this.foundXmmc
-      const empty = typeof this. inputs.xmmc !== 'string' || this. inputs.xmmc.length === 0
-
-      if (empty === true) {
-        return t
-      }
-      //else if (t.indexOf(this. inputs.xmmc) !== 0) {
-      //  return ''
-      //}
-
-      return t
-        .split(this. inputs.xmmc)
-        .slice(1)
-        .join(this. inputs.xmmc)
-    },
-  },
-
   methods: {
+    //富文本编辑器
+    kindeditorChange(e){
+      this.inputs.htbz = e
+    },
+
+    //用于在弹出窗口内的关键字搜索
+    search(list, key, isNewKey){
+      //按键抬起后多久判定为停止输入
+      let timeout = 300
+      //每次键盘抬起先重置定时器
+      if(this.timer !== null){
+        clearTimeout(this.timer)
+        console.log("重新计时")
+      }
+      //键盘抬起后0.3秒无输入，判定为停止输入，开始通信
+      this.timer = setTimeout(()=>{
+        //1：如果是项目列表窗口打开
+        if(this.popupProject){
+          console.log("重新通信");
+          getProjectList().then(res => {
+            //如果关键字为空，则显示全部列表
+            if(this.searchKey === ""){this.projectList = res}
+            //如果关键字不为空，则显示包含关键字的列表项
+            else{
+              let newList = [];
+              for(let key in res){
+                //关键字判定，包含输入内容的话就加入到新的列表里
+                if(res[key].xmmc.includes(this.searchKey) || res[key].xmlx.includes(this.searchKey) || res[key].sglx.includes(this.searchKey) || res[key].jfmc.includes(this.searchKey) || res[key].yfmc.includes(this.searchKey) || res[key].xmje.includes(this.searchKey)){
+                  newList.push(res[key])
+                }
+              }
+              this.projectList = newList
+            }
+          })
+        }
+        //2：如果是甲方列表窗口打开
+        else if(this.popupJF){
+          console.log("重新通信");
+          getJFList().then(res => {
+            if(this.searchKey === ""){this.jfList = res}
+            else{
+              let newList = [];
+              for(let key in res){
+                if(res[key].jfmc.includes(this.searchKey) || res[key].nsrsbh.includes(this.searchKey) || res[key].jffzr.includes(this.searchKey)){
+                  newList.push(res[key])
+                }
+              }
+              this.jfList = newList
+            }
+          })
+        }
+        //3：如果是乙方列表窗口打开
+        else if(this.popupYF){
+          console.log("重新通信");
+          getYFList().then(res => {
+            if(this.searchKey === ""){this.yfList = res}
+            else{
+              let newList = [];
+              for(let key in res){
+                if(res[key].yfmc.includes(this.searchKey) || res[key].nsrsbh.includes(this.searchKey) || res[key].yffzr.includes(this.searchKey)){
+                  newList.push(res[key])
+                }
+              }
+              this.yfList = newList
+            }
+          })
+        }
+        //4：如果是外部搜索框，而不是弹出窗口打开
+        else {
+          getList(list).then(res => {
+            console.log('重新通信');
+            for(let index=0, length=res.length; index<length; index++){
+              //查找到一样的项，则退出循环
+              if(this[list][index][key] === key){
+                //输入的内容不是新的
+                isNewKey = false
+                break;
+
+              }
+              //查到最后一项也没有符合的
+              else if(index === length-1){
+                //输入的内容是新的
+                isNewKey = true
+              }
+            }
+          })
+        }
+      }, timeout)
+
+    },
+
     //弹出项目列表窗口
     popupProjectWindow(){
       //获取项目列表
@@ -734,7 +814,6 @@ export default {
       this.popupProject= true;
       this.selected=[]
     },
-
     //弹出甲方列表窗口
     popupJFWindow(){
       //获取项目列表
@@ -753,48 +832,22 @@ export default {
       this.popupYF= true;
       this.selected=[]
     },
-
-
-    //自动补全项目名称：按下TAB键自动补全项目名称
-    processInputFill (e) {
-      if (e === void 0) {
-        return
-      }
-
-      if (e.keyCode === 27) {
-        if (this.inputFillCancelled !== true) {
-          this.inputFillCancelled = true
-        }
-      }
-      else if (e.keyCode === 9) {
-        if (this.inputFillCancelled !== true && this.inputShadowText.length > 0) {
-          stopAndPrevent(e)
-          this. inputs.xmmc = (typeof this. inputs.xmmc === 'string' ? this. inputs.xmmc : '') + this.inputShadowText
-        }
-      }
-      else if (this.inputFillCancelled === true) {
-        this.inputFillCancelled = false
-      }
-    },
-    //自动补全项目名称：在项目名称输入时在项目列表中寻找项目
-    searchProject(){
-      for(let index=0, length=this.projectList.length; index<length; index++){
-        if(this.projectList[index].xmmc.includes(this.inputs.xmmc)){
-          this.foundXmmc = this.projectList[index].xmmc
-        }
-        else{
-          this.isNewProject = true
-        }
-      }
-    },
-
     //完成选择项目
-    finishSelect(){
-      //自动填入被选项目的信息
-      this.inputs.xmmc = this.selected[0].xmmc;
+    finishPopup(popup, keys, isNewKey){
+      //关闭弹出窗口
+      this[popup] = false;
+      //如果有选中的项目
+      if(this.selected[0]){
+        //遍历keys，把被选项里面的信息自动填入表单
+        for(let index=0, length=keys.length; index<length; index++){
+          this.inputs[keys[index]] = this.selected[0][keys[index]]
+        }
+        //由于是被选中的，所以肯定不是新项
+        isNewKey = false
+      }
     },
 
-    //添加到文件列表
+    //附件：添加到文件列表
     addToAttachmentList() {
       //获取文件类型
       let fileType = ''
@@ -828,7 +881,7 @@ export default {
       //重新排列文件列表
       this.sortFileList()
     },
-    //重新排列文件列表
+    //附件：重新排列文件列表
     sortFileList() {
       //重新给文件列表编号
       let length = this.inputs.fjlb.length
@@ -838,7 +891,7 @@ export default {
 
       }
     },
-    //删除文件列表项
+    //附件：删除文件列表项
     deleteData(array, key, findKey) {
       //本地删除
       let length = array.length;
@@ -853,6 +906,7 @@ export default {
       this.sortFileList()
     },
 
+
     onSubmit() {
       if (this.accept !== true) {
         this.$q.notify({
@@ -866,7 +920,16 @@ export default {
         this.inputs.fj = null;
         //生成合同id
         this.inputs.id = this.date.getTime().toString()
+        //后端通信
         addContractList(this.inputs)
+
+        //如果甲方是新的，则向甲方列表加入一个新项
+        if(this.isNewJF){}
+        //如果乙方是新的，则向乙方列表加入一个新项
+        if(this.isNewYF){}
+        //如果项目是新的，则向项目列表加入一个新项
+        if(this.isNewProject){}
+
         //弹出通知
         this.$q.notify({
           color: "green-4",
@@ -911,52 +974,8 @@ export default {
           "fkbl": "",
           "sd": false
         }
-      }).onOk(() => {
-        // console.log('>>>> second OK catcher')
-      }).onCancel(() => {
-        // console.log('>>>> Cancel')
-      }).onDismiss(() => {
-        // console.log('I am triggered on both OK and Cancel')
       })
     }
-  },
-
-  watch: {
-    //监测弹出项目列表里的搜索框
-    searchKey:{
-      handler(val){
-        //开启加载动画
-        this.loading = true
-
-        if(val !== ""){
-          console.log("重新通信");
-          getProjectList().then(res => {
-            {
-              let newList = [];
-              for(let key in res){
-                let item = res[key]
-                if(item.xmmc.includes(val) || item.xmlx.includes(val) || item.sglx.includes(val) || item.jfmc.includes(val) || item.yfmc.includes(val) || item.xmje.includes(val)) {
-                  newList.push(item)
-                }
-              }
-              this.projectList = newList
-            }
-          })
-        }
-        else if(val === ""){
-          console.log("回到默认")
-          getProjectList().then(res => {
-            this.projectList = res
-          })
-        }
-        this.loading = false
-      },
-    },
-  },
-
-  //生命周期：挂载后
-  mounted() {
-
   },
 };
 </script>

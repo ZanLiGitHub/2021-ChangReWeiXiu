@@ -41,8 +41,7 @@
             class="my-sticky-header-table tabletop"
             style="height:auto;"
           >
-
-            <!-- 操作按钮注释start -->
+            <!--操作按钮-->
             <template #body-cell-opt="props">
               <td style="text-align: center;">
                 <q-btn icon="create" flat round dense color="blue" :to="{path:'/xgxm_xg', query:{id:props.key}}">
@@ -53,30 +52,20 @@
                 </q-btn>
               </td>
             </template>
-            <!-- 操作按钮注释 end-->
-
-
+            <!--操作按钮-->
           </q-table>
 
         </div>
-      </q-tab-panel>
-      <q-tab-panel name="sptg">
-        <div class="text-h6">Alarms</div>Lorem ipsum dolor sit amet consectetur adipisicing elit.
-      </q-tab-panel>
-      <q-tab-panel name="bh">
-        <div class="text-h6">Movies</div>Lorem ipsum dolor sit amet consectetur adipisicing elit.
-      </q-tab-panel>
-      <q-tab-panel name="gq">
-        <div class="text-h6">Movies</div>Lorem ipsum dolor sit amet consectetur adipisicing elit.
       </q-tab-panel>
     </q-tab-panels>
     <!--tab 切换 end -->
   </div>
 </template>
+
 <script>
 import {getProjectList, deleteProjectList} from "../../network/data";
 export default {
-  name: "",
+
   data() {
     return {
       //筛选项
@@ -151,13 +140,13 @@ export default {
           columns: true
         }
       ],//表格列名
-      loading:true,
+      loading:true,//加载状态
       data: [],//列表数据
       tab: "dsp",
-
       maximized: process.env.editMaximized, //编辑全屏
     };
   },
+
   methods: {
     //删除项目列表项
     deleteData(id){
@@ -178,19 +167,23 @@ export default {
       handler(val){
         //开启加载动画
         this.loading = true
+        //判断项目类型和施工类型，如果是默认选项或者选择了全部，则传参时不传这个选项
         let xmlx = val.xmlx==="项目类型"||val.xmlx==="全部"? null : val.xmlx
         let sglx = val.sglx==="施工类型"||val.sglx==="全部"? null : val.sglx
-
+        //若选项参数后关键字参数并非默认则使用带参数的get
         if(xmlx !== null || sglx !==null || val.searchKey !== ""){
           console.log("重新通信");
           getProjectList({xmlx,sglx}).then(res => {
+            //如果搜索关键字为空，则直接使用获取的列表
             if(val.searchKey === ""){
               this.data = res
             }
+            //如果搜索关键字不为空，则使用过滤后的列表
             else{
               let newList = [];
               for(let key in res){
                 let item = res[key]
+                //搜索项目名称，项目类型，施工类型，甲方名称，乙方名称，项目金额
                 if(item.xmmc.includes(val.searchKey) || item.xmlx.includes(val.searchKey) || item.sglx.includes(val.searchKey) || item.jfmc.includes(val.searchKey) || item.yfmc.includes(val.searchKey) || item.xmje.includes(val.searchKey)) {
                   newList.push(item)
                 }
@@ -199,6 +192,7 @@ export default {
             }
           })
         }
+        //如果搜索关键字从有值变回无值，则只带项目类型和施工类型两个参数再获取一次
         else if(val.searchKey === ""){
           console.log("回到默认")
           getProjectList({xmlx,sglx}).then(res => {
@@ -207,6 +201,7 @@ export default {
             }
           })
         }
+        //结束加载状态动画
         this.loading = false
       },
       deep:true
@@ -214,10 +209,12 @@ export default {
   },
   //生命周期：挂载后
   mounted() {
+    //开启加载状态动画
     this.loading = true
     //获取项目列表
     getProjectList().then(res => {
       this.data = res
+      //结束加载状态动画
       this.loading = false
     })
   },
